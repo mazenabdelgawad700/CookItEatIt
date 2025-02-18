@@ -7,7 +7,6 @@ namespace RecipeApp.Domain.Entities.Identity
     {
         public int CountryId { get; set; }
         public bool IsVerifiedChef { get; set; } = false;
-        public bool AcceptNotification { get; set; } = false;
         public string PreferredTheme { get; set; } = null!;
         public string ProfilePictureURL { get; set; } = null!;
         public string Bio { get; set; } = null!;
@@ -21,5 +20,6 @@ namespace RecipeApp.Domain.Entities.Identity
         public ICollection<RecipeLike> LikedRecipes { get; set; }
         public ICollection<ChefRecipeRequest> RecipeRequests { get; set; }
         public ICollection<ChefRecipeRequest> ReceivedRequests { get; set; }
+        public UserPreferences Preferences { get; set; }
     }
 }

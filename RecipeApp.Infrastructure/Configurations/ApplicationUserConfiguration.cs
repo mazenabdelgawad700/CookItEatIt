@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using RecipeApp.Domain.Entities.Identity;
+using RecipeApp.Domain.Entities.Models;
 
 namespace RecipeApp.Infrastructure.Configurations
 {
@@ -19,9 +20,6 @@ namespace RecipeApp.Infrastructure.Configurations
 
             builder.Property(x => x.Bio)
                    .HasMaxLength(1000);
-
-            //builder.Property(x => x.Country)
-            //       .HasMaxLength(100);
 
             builder.Property(x => x.IsVerifiedChef)
                    .IsRequired()
@@ -43,6 +41,11 @@ namespace RecipeApp.Infrastructure.Configurations
                    .WithOne(x => x.User)
                    .HasForeignKey(x => x.UserId)
                    .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(u => u.Preferences)
+                   .WithOne(p => p.User)
+                   .HasForeignKey<UserPreferences>(p => p.UserId)
+                   .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -22,15 +22,6 @@
     <ProjectReference Include="..\RecipeApp.Shared\RecipeApp.Shared.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-<<<<<<< HEAD
-    <Folder Include="Features\ApplicationUser\Command\Handler\" />
-    <Folder Include="Features\Authentication\" />
-=======
-    <Folder Include="Features\Authentication\Command\Handler\" />
->>>>>>> authentication
-  </ItemGroup>
-
 
 
 </Project>
