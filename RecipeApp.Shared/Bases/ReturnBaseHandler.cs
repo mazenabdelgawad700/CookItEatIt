@@ -1,10 +1,10 @@
 ﻿using System.Net;
 
 namespace RecipeApp.Shared.Bases;
-public class ReturnBaseHandler
+public static class ReturnBaseHandler
 {
     #region Handle Functions
-    public ReturnBase<T> Success<T>(T entity, string? message)
+    public static ReturnBase<T> Success<T>(T entity, string? message)
     {
         return new ReturnBase<T>()
         {
@@ -14,7 +14,7 @@ public class ReturnBaseHandler
             Message = message ?? "Success",
         };
     }
-    public ReturnBase<T> Unauthorized<T>(string message = null!)
+    public static ReturnBase<T> Unauthorized<T>(string message = null!)
     {
         return new ReturnBase<T>()
         {
@@ -23,7 +23,7 @@ public class ReturnBaseHandler
             Message = message ?? "Unauthorized"
         };
     }
-    public ReturnBase<T> LoginTimeOut<T>(string message = null!)
+    public static ReturnBase<T> LoginTimeOut<T>(string message = null!)
     {
         return new ReturnBase<T>()
         {
@@ -32,7 +32,7 @@ public class ReturnBaseHandler
             Message = message ?? "Login Time Out"
         };
     }
-    public ReturnBase<T> Failed<T>(string? message = null)
+    public static ReturnBase<T> Failed<T>(string? message = null)
     {
         return new ReturnBase<T>()
         {
@@ -41,7 +41,7 @@ public class ReturnBaseHandler
             Message = message ?? "Failed"
         };
     }
-    public ReturnBase<T> BadRequest<T>(string message = null!)
+    public static ReturnBase<T> BadRequest<T>(string message = null!)
     {
         return new ReturnBase<T>()
         {
@@ -50,7 +50,7 @@ public class ReturnBaseHandler
             Message = message ?? "Bad Request"
         };
     }
-    public ReturnBase<T> UnprocessableEntity<T>(string message = null!)
+    public static ReturnBase<T> UnprocessableEntity<T>(string message = null!)
     {
         return new ReturnBase<T>()
         {
@@ -59,7 +59,7 @@ public class ReturnBaseHandler
             Message = message ?? "Unprocessable Entity"
         };
     }
-    public ReturnBase<T> NotFound<T>(string message = null!)
+    public static ReturnBase<T> NotFound<T>(string message = null!)
     {
         return new ReturnBase<T>()
         {
@@ -68,7 +68,7 @@ public class ReturnBaseHandler
             Message = message ?? "NotFound"
         };
     }
-    public ReturnBase<T> Created<T>(T entity, string? message)
+    public static ReturnBase<T> Created<T>(T entity, string? message)
     {
         return new ReturnBase<T>()
         {
@@ -78,7 +78,7 @@ public class ReturnBaseHandler
             Message = message ?? "Created",
         };
     }
-    public ReturnBase<T> Updated<T>(string? message)
+    public static ReturnBase<T> Updated<T>(string? message)
     {
         return new ReturnBase<T>()
         {
@@ -87,7 +87,7 @@ public class ReturnBaseHandler
             Message = message ?? "Updated"
         };
     }
-    public ReturnBase<T> Deleted<T>(string? message)
+    public static ReturnBase<T> Deleted<T>(string? message)
     {
         return new ReturnBase<T>()
         {

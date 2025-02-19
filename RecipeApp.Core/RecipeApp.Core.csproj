@@ -22,10 +22,4 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
   </ItemGroup>
 
-
-  <ItemGroup>
-    <Folder Include="Features\ApplicationUser\Command\Handler\" />
-    <Folder Include="Features\ApplicationUser\Command\Handler\" />
-  </ItemGroup>
-
 </Project>

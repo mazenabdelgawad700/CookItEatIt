@@ -1,12 +1,17 @@
 ﻿using FluentValidation;
 using RecipeApp.Core.Features.ApplicationUser.Command.Model;
+using RecipeApp.Service.Abstraction;
 
 namespace RecipeApp.Core.Features.ApplicationUser.Command.Validator
 {
     public class AddApplicationUserValidator : AbstractValidator<AddApplicationUserCommand>
     {
-        public AddApplicationUserValidator()
+
+        private readonly IApplicationUserService _applicationUserService;
+
+        public AddApplicationUserValidator(IApplicationUserService applicationUserService)
         {
+            _applicationUserService = applicationUserService;
             ApplyValidationRules();
             ApplyCustomValidationRules();
         }
@@ -21,19 +26,21 @@ namespace RecipeApp.Core.Features.ApplicationUser.Command.Validator
                 .Matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")
                 .WithMessage("Email address is not valid");
 
-            RuleFor(x => x.UserName)
-                .NotEmpty()
-                .WithMessage("User Name is required")
-                .NotNull()
-                .WithMessage("User Name can not be null");
-
             RuleFor(x => x.Password)
                 .NotEmpty()
-                .MinimumLength(8);
+                .WithMessage("Password is required")
+                .Matches("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[\\[\\]{}!@#$%^&*()]).{8,}$")
+                .WithMessage(
+                "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number and one special character"
+                );
         }
         private void ApplyCustomValidationRules()
         {
-            // Check if email is already registered
+            RuleFor(x => x.Email).MustAsync(async (key, CancellationToken) =>
+            {
+                var result = await _applicationUserService.IsEmailAlreadyRegisteredAsync(key);
+                return !result.Data;
+            }).WithMessage("Email is already used");
         }
     }
 }
