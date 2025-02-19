@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using RecipeApp.Shared.Bases;
 
-namespace RecipeApp.Core.Features.Authentication.Command.Model
+namespace RecipeApp.Core.Features.ApplicationUser.Command.Model
 {
     public class AddApplicationUserCommand : IRequest<ReturnBase<string>>
     {

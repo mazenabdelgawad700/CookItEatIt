@@ -5,8 +5,6 @@ VisualStudioVersion = 17.11.35208.52
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecipeApp.API", "RecipeApp.API\RecipeApp.API.csproj", "{365A8471-CCAD-44B9-B0C5-60BE8DC69097}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecipeApp.Core", "RecipeApp.Core\RecipeApp.Core.csproj", "{00F5FBA7-EF5D-4E9F-BDB9-8306B1969B8F}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecipeApp.Domain", "RecipeApp.Domain\RecipeApp.Domain.csproj", "{A6F51502-631E-454A-9307-DCBC7CF3C980}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecipeApp.Service", "RecipeApp.Service\RecipeApp.Service.csproj", "{68FCE4B2-5AD2-4FBC-A617-662187D73CD3}"
@@ -25,10 +23,6 @@ Global
 		{365A8471-CCAD-44B9-B0C5-60BE8DC69097}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{365A8471-CCAD-44B9-B0C5-60BE8DC69097}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{365A8471-CCAD-44B9-B0C5-60BE8DC69097}.Release|Any CPU.Build.0 = Release|Any CPU
-		{00F5FBA7-EF5D-4E9F-BDB9-8306B1969B8F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{00F5FBA7-EF5D-4E9F-BDB9-8306B1969B8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{00F5FBA7-EF5D-4E9F-BDB9-8306B1969B8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{00F5FBA7-EF5D-4E9F-BDB9-8306B1969B8F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A6F51502-631E-454A-9307-DCBC7CF3C980}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A6F51502-631E-454A-9307-DCBC7CF3C980}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A6F51502-631E-454A-9307-DCBC7CF3C980}.Release|Any CPU.ActiveCfg = Release|Any CPU

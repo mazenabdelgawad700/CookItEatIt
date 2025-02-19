@@ -25,6 +25,10 @@
 
   <ItemGroup>
     <Folder Include="Features\ApplicationUser\Command\Handler\" />
+<<<<<<< HEAD
+=======
+    <Folder Include="Features\Authentication\" />
+>>>>>>> AddApplicationUser
   </ItemGroup>
 
 </Project>
