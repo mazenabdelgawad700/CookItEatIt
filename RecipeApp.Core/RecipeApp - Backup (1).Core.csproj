@@ -7,13 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RecipeApp.Domain\RecipeApp.Domain.csproj" />
-    <ProjectReference Include="..\RecipeApp.Infrastructure\RecipeApp.Infrastructure.csproj" />
-    <ProjectReference Include="..\RecipeApp.Service\RecipeApp.Service.csproj" />
-    <ProjectReference Include="..\RecipeApp.Shared\RecipeApp.Shared.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="FluentValidation" Version="11.10.0" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.10.0" />
@@ -22,9 +15,26 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\RecipeApp.Domain\RecipeApp.Domain.csproj" />
+    <ProjectReference Include="..\RecipeApp.Infrastructure\RecipeApp.Infrastructure.csproj" />
+    <ProjectReference Include="..\RecipeApp.Service\RecipeApp.Service.csproj" />
+    <ProjectReference Include="..\RecipeApp.Shared\RecipeApp.Shared.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
+<<<<<<< HEAD
+<<<<<<< HEAD
     <Folder Include="Features\ApplicationUser\Command\Handler\" />
+    <Folder Include="Features\Authentication\" />
+=======
+    <Folder Include="Features\Authentication\Command\Handler\" />
+>>>>>>> authentication
+=======
+    <Folder Include="Features\Authentication\Command\Handler\" />
+>>>>>>> authentication
   </ItemGroup>
+
+
 
 </Project>
