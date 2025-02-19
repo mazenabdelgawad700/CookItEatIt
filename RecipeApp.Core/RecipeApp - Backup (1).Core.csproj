@@ -23,16 +23,12 @@
   </ItemGroup>
 
   <ItemGroup>
-<<<<<<< HEAD
-<<<<<<< HEAD
+
     <Folder Include="Features\ApplicationUser\Command\Handler\" />
     <Folder Include="Features\Authentication\" />
-=======
     <Folder Include="Features\Authentication\Command\Handler\" />
->>>>>>> authentication
-=======
     <Folder Include="Features\Authentication\Command\Handler\" />
->>>>>>> authentication
+
   </ItemGroup>
 
 
