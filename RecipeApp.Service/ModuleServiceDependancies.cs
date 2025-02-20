@@ -9,6 +9,7 @@ public static class ModuleServiceDependancies
     public static IServiceCollection AddServiceDependancies(this IServiceCollection services)
     {
         services.AddTransient<IApplicationUserService, ApplicationUserService>();
+        services.AddTransient<ISendEmailService, SendEmailService>();
         return services;
     }
 }

@@ -25,7 +25,7 @@ namespace RecipeApp.Core.Features.ApplicationUser.Command.Handler
 
                 if (createUserResult.Succeeded)
                 {
-                    return ReturnBaseHandler.Created("", "User Created Successfully");
+                    return ReturnBaseHandler.Created("", createUserResult.Message);
                 }
                 return ReturnBaseHandler.Failed<string>("Failed to add user.");
             }
