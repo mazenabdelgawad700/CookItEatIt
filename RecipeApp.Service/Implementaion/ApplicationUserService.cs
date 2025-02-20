@@ -89,7 +89,7 @@ namespace RecipeApp.Service.Implementaion
 
                     string returnUrl = uriBuilder.ToString();
 
-                    string message = $"<html><body>To Confirm Email Click Link: <a href=\"{returnUrl}\">Confirmation Link</a></body></html>";
+                    string message = $"To Confirm Email Click Link: <a href=\"{returnUrl}\">Confirmation Link</a>";
 
                     ReturnBase<string> sendEmailResult = await _emailService.SendEmailAsync(user.Email, message, "text/html");
                     return ReturnBaseHandler.Success(sendEmailResult.Data == "Success", sendEmailResult.Message);
