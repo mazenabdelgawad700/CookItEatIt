@@ -47,7 +47,6 @@ namespace RecipeApp.Service.Implementaion
                 return ReturnBaseHandler.Failed<string>($"{ex.Message}");
             }
         }
-
         public async Task<ReturnBase<bool>> IsEmailAlreadyRegisteredAsync(string email)
         {
             try

@@ -2,12 +2,11 @@
 {
     public class EmailSettings
     {
-        public string ClientConnectionString { get; set; } = null!;
-        public int ClientConnectionPort { get; set; }
-        public bool ClientConnectionUseSSL { get; set; }
-        public string AuthenticationEmail { get; set; } = null!;
-        public string AuthenticationPassword { get; set; } = null!;
-        public string MailBoxSenderHeader { get; set; } = null!;
-        public string MailBoxSubject { get; set; } = null!;
+        public string Host { get; set; } = null!;
+        public int Port { get; set; }
+        public bool UseSSL { get; set; }
+        public string EmailAddress { get; set; } = null!;
+        public string Password { get; set; } = null!;
+        public string SenderHeader { get; set; } = null!;
     }
 }
