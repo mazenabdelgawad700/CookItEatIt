@@ -83,7 +83,7 @@ namespace RecipeApp.Service.Implementaion
                         Scheme = resquestAccessor.Scheme,
                         Host = resquestAccessor.Host.Host,
                         Port = resquestAccessor.Host.Port ?? -1,
-                        Path = "Api/V1/Authentication/ConfirmEmail",
+                        Path = "api/applicationuser/ConfirmEmail",
                         Query = $"userId={user.Id}&token={encodedToken}"
                     };
 

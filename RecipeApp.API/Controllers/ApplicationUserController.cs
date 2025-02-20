@@ -14,5 +14,11 @@ namespace RecipeApp.API.Controllers
             ReturnBase<string> response = await Mediator.Send(command);
             return NewResult(response);
         }
+        [HttpGet]
+        public async Task<IActionResult> ConfirmEmail([FromQuery] ConfirmEmailCommand command)
+        {
+            ReturnBase<bool> response = await Mediator.Send(command);
+            return NewResult(response);
+        }
     }
 }
