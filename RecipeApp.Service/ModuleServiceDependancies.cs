@@ -11,6 +11,7 @@ public static class ModuleServiceDependancies
         services.AddTransient<IApplicationUserService, ApplicationUserService>();
         services.AddTransient<ISendEmailService, SendEmailService>();
         services.AddTransient<IConfirmEmailSerivce, ConfirmEmailSerivce>();
+        services.AddTransient<IAuthenticationService, AuthenticationService>();
         return services;
     }
 }
