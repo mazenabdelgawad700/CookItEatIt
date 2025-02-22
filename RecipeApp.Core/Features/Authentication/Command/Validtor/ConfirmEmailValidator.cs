@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
-using RecipeApp.Core.Features.ApplicationUser.Command.Model;
+using RecipeApp.Core.Features.Authentication.Command.Models;
 
-namespace RecipeApp.Core.Features.ApplicationUser.Command.Validator
+namespace RecipeApp.Core.Features.Authentication.Command.Validtor
 {
     public class ConfirmEmailValidator : AbstractValidator<ConfirmEmailCommand>
     {

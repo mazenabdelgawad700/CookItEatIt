@@ -51,6 +51,49 @@ namespace RecipeApp.Service.Implementaion
             }
             return ReturnBaseHandler.Success(token, "Logged in successfully");
         }
+        public async Task<ReturnBase<string>> RegisterAsync(ApplicationUser appUser, string password)
+        {
+            try
+            {
+                IdentityResult createUserResult = await _userManager.CreateAsync(appUser, password);
+
+                if (createUserResult.Succeeded)
+                {
+                    ReturnBase<bool> sendConfirmationEmailResult = await _confirmEmailSerivce.SendConfirmationEmailAsync(appUser);
+                    if (sendConfirmationEmailResult.Data)
+                    {
+                        return ReturnBaseHandler.Created("", $"Confirmation Email has been sent to {appUser.Email} Please, confirm your email");
+                    }
+                    return ReturnBaseHandler.Created("", "We could not send a confirmation email to you, please log in to confirm your email!");
+                }
+                return ReturnBaseHandler.Failed<string>("An error occurred while creating user.");
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<string>($"{ex.Message}");
+            }
+        }
+        public async Task<ReturnBase<bool>> IsEmailAlreadyRegisteredAsync(string email)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(email))
+                {
+                    return ReturnBaseHandler.BadRequest<bool>("Email is required.");
+                }
+
+                ApplicationUser? user = await _userManager.FindByEmailAsync(email);
+                if (user is not null)
+                {
+                    return ReturnBaseHandler.Success(true, "Email is already registered.");
+                }
+                return ReturnBaseHandler.Success(false, "Email is available.");
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>($"An error occurred: {ex.Message}");
+            }
+        }
         private string GenerateJwtToken(string username, int userId)
         {
             List<Claim> claims = GetClaims(username, userId);
@@ -72,8 +115,7 @@ namespace RecipeApp.Service.Implementaion
         {
             return [
                 new Claim(JwtRegisteredClaimNames.Name, username),
-                new Claim(JwtRegisteredClaimNames.NameId, userId.ToString()),
-                new Claim(JwtRegisteredClaimNames.Sub, username),
+                new Claim("UserId", userId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             ];
         }

@@ -1,17 +1,17 @@
 ﻿using FluentValidation;
-using RecipeApp.Core.Features.ApplicationUser.Command.Model;
+using RecipeApp.Core.Features.Authentication.Command.Models;
 using RecipeApp.Service.Abstraction;
 
-namespace RecipeApp.Core.Features.ApplicationUser.Command.Validator
+namespace RecipeApp.Core.Features.Authentication.Command.Validtor
 {
     public class AddApplicationUserValidator : AbstractValidator<AddApplicationUserCommand>
     {
 
-        private readonly IApplicationUserService _applicationUserService;
+        private readonly IAuthenticationService _authenticationService;
 
-        public AddApplicationUserValidator(IApplicationUserService applicationUserService)
+        public AddApplicationUserValidator(IAuthenticationService authenticationService)
         {
-            _applicationUserService = applicationUserService;
+            _authenticationService = authenticationService;
             ApplyValidationRules();
             ApplyCustomValidationRules();
         }
@@ -38,7 +38,7 @@ namespace RecipeApp.Core.Features.ApplicationUser.Command.Validator
         {
             RuleFor(x => x.Email).MustAsync(async (key, CancellationToken) =>
             {
-                var result = await _applicationUserService.IsEmailAlreadyRegisteredAsync(key);
+                var result = await _authenticationService.IsEmailAlreadyRegisteredAsync(key);
                 return !result.Data;
             }).WithMessage("Email is already used");
         }

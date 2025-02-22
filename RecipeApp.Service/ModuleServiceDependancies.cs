@@ -8,10 +8,11 @@ public static class ModuleServiceDependancies
 {
     public static IServiceCollection AddServiceDependancies(this IServiceCollection services)
     {
-        services.AddTransient<IApplicationUserService, ApplicationUserService>();
+        services.AddTransient<IProfilePictureService, ProfilePictureService>();
         services.AddTransient<ISendEmailService, SendEmailService>();
         services.AddTransient<IConfirmEmailSerivce, ConfirmEmailSerivce>();
         services.AddTransient<IAuthenticationService, AuthenticationService>();
+        services.AddTransient<IFileService, FileService>();
         return services;
     }
 }

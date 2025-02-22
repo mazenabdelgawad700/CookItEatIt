@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RecipeApp.API.Base;
-using RecipeApp.Core.Features.ApplicationUser.Command.Model;
 using RecipeApp.Core.Features.Authentication.Command.Models;
 using RecipeApp.Shared.Bases;
 
