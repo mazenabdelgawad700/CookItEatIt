@@ -14,6 +14,10 @@ namespace RecipeApp.Infrastructure.Configurations
                    .IsRequired()
                    .HasMaxLength(200);
 
+            builder.Property(x => x.Description)
+                   .IsRequired()
+                   .HasMaxLength(500);
+
             builder.Property(x => x.ImgURL)
                    .HasMaxLength(500);
 

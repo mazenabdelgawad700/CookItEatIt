@@ -8,6 +8,7 @@ namespace RecipeApp.Domain.Entities.Models
         public int UserId { get; set; }
         public int CountryId { get; set; }
         public string RecipeName { get; set; } = null!;
+        public string Description { get; set; } = null!;
         public string ImgURL { get; set; } = null!;
         public int ServesCount { get; set; }
         public int CookTimeMinutes { get; set; }
