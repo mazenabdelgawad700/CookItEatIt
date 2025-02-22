@@ -59,7 +59,7 @@ namespace RecipeApp.Infrastructure
                x.TokenValidationParameters = new TokenValidationParameters
                {
                    ValidateIssuer = jwtSettings.ValidateIssuer,
-                   ValidIssuers = new[] { jwtSettings.Issuer },
+                   ValidIssuers = [jwtSettings.Issuer],
                    ValidateIssuerSigningKey = jwtSettings.ValidateIssuerSigningKey,
                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSettings.Secret)),
                    ValidAudience = jwtSettings.Audience,
