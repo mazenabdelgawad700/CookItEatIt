@@ -18,6 +18,9 @@ namespace RecipeApp.Infrastructure.Configurations
             builder.Property(x => x.ProfilePictureURL)
                    .HasMaxLength(500);
 
+            builder.Property(x => x.PreferredTheme)
+                   .HasDefaultValue(1);
+
             builder.Property(x => x.Bio)
                    .HasMaxLength(1000);
 

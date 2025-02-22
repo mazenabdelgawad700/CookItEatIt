@@ -186,8 +186,10 @@ namespace RecipeApp.Infrastructure.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("PreferredTheme")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<byte>("PreferredTheme")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint")
+                        .HasDefaultValue((byte)1);
 
                     b.Property<string>("ProfilePictureURL")
                         .HasMaxLength(500)

@@ -7,7 +7,7 @@ namespace RecipeApp.Domain.Entities.Identity
     {
         public int? CountryId { get; set; }
         public bool IsVerifiedChef { get; set; } = false;
-        public string? PreferredTheme { get; set; }
+        public byte PreferredTheme { get; set; }
         public string? ProfilePictureURL { get; set; }
         public string? Bio { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
