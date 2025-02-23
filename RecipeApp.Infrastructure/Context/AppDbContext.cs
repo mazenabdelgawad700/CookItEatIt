@@ -23,6 +23,7 @@ namespace RecipeApp.Infrastructure.Context
         public DbSet<Country> Country { get; set; }
         public DbSet<ChefRecipeRequest> ChefRecipeRequest { get; set; }
         public DbSet<LoginAttempt> LoginAttempt { get; set; }
+        public DbSet<ApplicationUserRefreshToken> UserRefreshToken { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

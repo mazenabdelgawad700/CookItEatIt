@@ -195,7 +195,7 @@ namespace RecipeApp.Service.Implementation
                 issuer: _jwtSettings.Issuer,
                 audience: _jwtSettings.Audience,
                 claims: claims,
-                expires: DateTime.Now.AddMonths(_jwtSettings.AccessTokenExpireDate),
+                expires: DateTime.Now.AddDays(_jwtSettings.AccessTokenExpireDate),
                 signingCredentials: creds
             );
 
