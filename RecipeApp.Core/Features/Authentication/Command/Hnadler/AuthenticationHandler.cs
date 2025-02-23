@@ -9,7 +9,8 @@ namespace RecipeApp.Core.Features.Authentication.Command.Hnadler
 {
     internal class AuthenticationHandler : IRequestHandler<LoginCommand, ReturnBase<string>>, IRequestHandler<RegisterCommand, ReturnBase<string>>,
         IRequestHandler<ConfirmEmailCommand, ReturnBase<bool>>,
-        IRequestHandler<ChangePasswordCommand, ReturnBase<bool>>
+        IRequestHandler<ChangePasswordCommand, ReturnBase<bool>>,
+        IRequestHandler<RefreshTokenCommand, ReturnBase<string>>
     {
         private readonly IAuthenticationService _authenticationService;
         private readonly IConfirmEmailSerivce _confirmEmailSerivce;
@@ -86,7 +87,6 @@ namespace RecipeApp.Core.Features.Authentication.Command.Hnadler
                 return ReturnBaseHandler.Failed<string>(ex.Message);
             }
         }
-
         public async Task<ReturnBase<bool>> Handle(ChangePasswordCommand request, CancellationToken cancellationToken)
         {
             try
@@ -107,6 +107,31 @@ namespace RecipeApp.Core.Features.Authentication.Command.Hnadler
             catch (Exception ex)
             {
                 return ReturnBaseHandler.Failed<bool>(ex.Message);
+            }
+        }
+        public async Task<ReturnBase<string>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (request.AccessToken is null)
+                    return ReturnBaseHandler.Failed<string>("Access Token is required");
+
+                ReturnBase<string> refreshTokenResult = await _authenticationService.RefreshTokenAsync(request.AccessToken);
+
+                if (refreshTokenResult.Succeeded)
+                    return ReturnBaseHandler.Success(refreshTokenResult.Data, refreshTokenResult.Message);
+
+                return refreshTokenResult.Message switch
+                {
+                    "InvalidAccessToken" => ReturnBaseHandler.Failed<string>("Your session has expired. please log in again."),
+                    "FailedToGenerateNewAccessToken" =>
+                    ReturnBaseHandler.Failed<string>("Something went wrong. Please log in again."),
+                    _ => ReturnBaseHandler.Failed<string>(refreshTokenResult.Message),
+                };
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<string>(ex.Message);
             }
         }
     }

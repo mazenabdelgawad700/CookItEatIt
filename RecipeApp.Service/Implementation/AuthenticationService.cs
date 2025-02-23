@@ -10,6 +10,7 @@ using RecipeApp.Service.Abstraction;
 using RecipeApp.Shared.Bases;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace RecipeApp.Service.Implementation
@@ -115,8 +116,24 @@ namespace RecipeApp.Service.Implementation
 
                 await _dbContext.SaveChangesAsync();
 
+                string jwtId = Guid.NewGuid().ToString();
+                string token = GenerateJwtToken(user.UserName!, user.Id, jwtId);
 
-                string token = GenerateJwtToken(user.UserName!, user.Id);
+
+                ApplicationUserRefreshToken newRefreshToken = new()
+                {
+                    UserId = user.Id,
+                    RefreshToken = GenerateRefreshToken(),
+                    JwtId = jwtId,
+                    IsUsed = false,
+                    IsRevoked = false,
+                    CreatedAt = DateTime.UtcNow,
+                    ExpiresAt = DateTime.UtcNow.AddMonths(_jwtSettings.RefreshTokenExpireDate)
+                };
+
+                await _dbContext.UserRefreshToken.AddAsync(newRefreshToken);
+                await _dbContext.SaveChangesAsync();
+
 
                 if (!user.EmailConfirmed)
                 {
@@ -163,52 +180,6 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<string>($"{ex.Message}");
             }
         }
-        public async Task<ReturnBase<bool>> IsEmailAlreadyRegisteredAsync(string email)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(email))
-                {
-                    return ReturnBaseHandler.BadRequest<bool>("Email is required.");
-                }
-
-                ApplicationUser? user = await _userManager.FindByEmailAsync(email);
-                if (user is not null)
-                {
-                    return ReturnBaseHandler.Success(true, "Email is already registered.");
-                }
-                return ReturnBaseHandler.Success(false, "Email is available.");
-            }
-            catch (Exception ex)
-            {
-                return ReturnBaseHandler.Failed<bool>($"An error occurred: {ex.Message}");
-            }
-        }
-        private string GenerateJwtToken(string username, int userId)
-        {
-            List<Claim> claims = GetClaims(username, userId);
-
-            SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
-            SigningCredentials creds = new(key, SecurityAlgorithms.HmacSha256);
-
-            JwtSecurityToken token = new(
-                issuer: _jwtSettings.Issuer,
-                audience: _jwtSettings.Audience,
-                claims: claims,
-                expires: DateTime.Now.AddDays(_jwtSettings.AccessTokenExpireDate),
-                signingCredentials: creds
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
-        private List<Claim> GetClaims(string username, int userId)
-        {
-            return [
-                new Claim(JwtRegisteredClaimNames.Name, username),
-                new Claim("UserId", userId.ToString()),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            ];
-        }
         public async Task<ReturnBase<bool>> ChangePasswordAsync(int userId, string currentPassword, string newPassword)
         {
             IDbContextTransaction transaction = await _dbContext.Database.BeginTransactionAsync();
@@ -248,6 +219,142 @@ namespace RecipeApp.Service.Implementation
                 await transaction.RollbackAsync();
                 return ReturnBaseHandler.Failed<bool>(ex.Message);
             }
+        }
+        public async Task<ReturnBase<bool>> IsEmailAlreadyRegisteredAsync(string email)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(email))
+                {
+                    return ReturnBaseHandler.BadRequest<bool>("Email is required.");
+                }
+
+                ApplicationUser? user = await _userManager.FindByEmailAsync(email);
+                if (user is not null)
+                {
+                    return ReturnBaseHandler.Success(true, "Email is already registered.");
+                }
+                return ReturnBaseHandler.Success(false, "Email is available.");
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>($"An error occurred: {ex.Message}");
+            }
+        }
+
+        private string GenerateJwtToken(string username, int userId, string jwtId)
+        {
+            List<Claim> claims = GetClaims(username, userId, jwtId);
+
+            SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
+            SigningCredentials creds = new(key, SecurityAlgorithms.HmacSha256);
+
+            JwtSecurityToken token = new(
+                issuer: _jwtSettings.Issuer,
+                audience: _jwtSettings.Audience,
+                claims: claims,
+                expires: DateTime.Now.AddDays(_jwtSettings.AccessTokenExpireDate),
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+        private List<Claim> GetClaims(string username, int userId, string jwtId)
+        {
+            return [
+                new Claim(JwtRegisteredClaimNames.Name, username),
+                new Claim("UserId", userId.ToString()),
+                new Claim(JwtRegisteredClaimNames.Jti, jwtId)
+            ];
+        }
+        private bool IsAccessTokenExpired(string accessToken)
+        {
+            try
+            {
+
+                JwtSecurityTokenHandler tokenHandler = new();
+                if (tokenHandler.ReadToken(accessToken) is not JwtSecurityToken token)
+                    return true;
+
+                DateTimeOffset expirationTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(token.Claims.First(c => c.Type == JwtRegisteredClaimNames.Exp).Value));
+
+                return expirationTime.UtcDateTime <= DateTime.UtcNow;
+            }
+            catch
+            {
+                return true;
+            }
+        }
+        public async Task<ReturnBase<string>> RefreshTokenAsync(string accessToken)
+        {
+            try
+            {
+                if (!IsAccessTokenExpired(accessToken))
+                    return ReturnBaseHandler.Success("", "Access Token Is Valid");
+
+                string? userId = GetUserIdFromToken(accessToken);
+                string? jwtId = GetJwtIdFromToken(accessToken);
+
+                if (jwtId is null || userId is null)
+                    return ReturnBaseHandler.Failed<string>("InvalidAccessToken");
+
+                ApplicationUserRefreshToken? storedRefreshToken = await _dbContext.UserRefreshToken
+                    .FirstOrDefaultAsync(rt => rt.UserId.ToString() == userId && rt.JwtId == jwtId);
+
+                if (storedRefreshToken is null || storedRefreshToken.IsRevoked)
+                    return ReturnBaseHandler.Failed<string>("Your session has expired. please log in again.");
+
+                if (storedRefreshToken.ExpiresAt < DateTime.UtcNow)
+                    return ReturnBaseHandler.Failed<string>("Your session has expired. please log in again.");
+
+                if (!storedRefreshToken.IsUsed)
+                {
+                    storedRefreshToken.IsUsed = true;
+                    await _dbContext.SaveChangesAsync();
+                }
+
+                ApplicationUser? user = await _userManager.FindByIdAsync(userId);
+
+                if (user is null)
+                    return ReturnBaseHandler.Failed<string>("InvalidAccessToken");
+
+
+                string newJwtId = Guid.NewGuid().ToString();
+                string newAccessToken = GenerateJwtToken(user.UserName!, user.Id, newJwtId);
+
+                storedRefreshToken.JwtId = newJwtId;
+                await _dbContext.SaveChangesAsync();
+
+                if (newAccessToken is null)
+                    return ReturnBaseHandler.Failed<string>("FailedToGenerateNewAccessToken");
+
+                return ReturnBaseHandler.Success(newAccessToken, "New Access Token Created");
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<string>(ex.Message);
+            }
+        }
+        private string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[32];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+            return Convert.ToBase64String(randomNumber);
+        }
+        private string? GetJwtIdFromToken(string token)
+        {
+            JwtSecurityTokenHandler tokenHandler = new();
+            JwtSecurityToken jwtToken = tokenHandler.ReadJwtToken(token);
+
+            return jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
+        }
+        private string? GetUserIdFromToken(string token)
+        {
+            JwtSecurityTokenHandler tokenHandler = new();
+            JwtSecurityToken jwtToken = tokenHandler.ReadJwtToken(token);
+
+            return jwtToken.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value.ToString();
         }
     }
 }

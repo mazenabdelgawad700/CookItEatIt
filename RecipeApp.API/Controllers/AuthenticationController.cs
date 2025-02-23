@@ -20,7 +20,6 @@ namespace RecipeApp.API.Controllers
         }
 
         [HttpPost]
-        //[EnableRateLimiting("LogInPolicy")]
         public async Task<IActionResult> LogIn([FromBody] LoginCommand command)
         {
             ReturnBase<string> response = await Mediator.Send(command);
@@ -73,5 +72,11 @@ namespace RecipeApp.API.Controllers
             return NewResult(response);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
+        {
+            ReturnBase<string> response = await Mediator.Send(command);
+            return NewResult(response);
+        }
     }
 }
