@@ -4,7 +4,7 @@ using RecipeApp.Domain.Helpers;
 using RecipeApp.Service.Abstraction;
 using RecipeApp.Shared.Bases;
 
-namespace RecipeApp.Service.Implementaion
+namespace RecipeApp.Service.Implementation
 {
     internal class SendEmailService : ISendEmailService
     {
@@ -20,7 +20,7 @@ namespace RecipeApp.Service.Implementaion
         }
         #endregion
 
-        public async Task<ReturnBase<string>> SendEmailAsync(string email, string message, string contentType = "text/plain")
+        public async Task<ReturnBase<string>> SendEmailAsync(string email, string message, string subject, string contentType = "text/plain")
         {
             try
             {
@@ -33,7 +33,7 @@ namespace RecipeApp.Service.Implementaion
 
                 MailboxAddress email_To = new(_emailSettings.SenderHeader, email);
                 emailMessage.To.Add(email_To);
-                emailMessage.Subject = "Confirmation Link";
+                emailMessage.Subject = subject;
 
                 BodyBuilder emailBodyBuilder = new();
                 if (contentType == "text/html")

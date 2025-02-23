@@ -3,9 +3,9 @@ using RecipeApp.Infrastructure.InfrastructureBases;
 
 namespace RecipeApp.Infrastructure;
 
-public static class ModuleInfrastructureDependancies
+public static class ModuleInfrastructureDependencies
 {
-    public static IServiceCollection AddInfrastructureDependancies
+    public static IServiceCollection AddInfrastructureDependencies
         (this IServiceCollection services)
     {
         //services.AddTransient<IStudentRepository, StudentRepository>();

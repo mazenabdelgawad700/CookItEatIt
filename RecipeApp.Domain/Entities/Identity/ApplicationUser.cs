@@ -12,14 +12,15 @@ namespace RecipeApp.Domain.Entities.Identity
         public string? Bio { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
-        public Country? Country { get; set; }
-        public ICollection<Recipe> Recipes { get; set; }
-        public ICollection<UserFollower> Followers { get; set; }
-        public ICollection<UserFollower> Following { get; set; }
-        public ICollection<SavedRecipe> SavedRecipes { get; set; }
-        public ICollection<RecipeLike> LikedRecipes { get; set; }
-        public ICollection<ChefRecipeRequest> RecipeRequests { get; set; }
-        public ICollection<ChefRecipeRequest> ReceivedRequests { get; set; }
-        public UserPreferences Preferences { get; set; }
+        public virtual Country? Country { get; set; }
+        public virtual UserPreferences Preferences { get; set; }
+        public virtual ICollection<Recipe> Recipes { get; set; }
+        public virtual ICollection<UserFollower> Followers { get; set; }
+        public virtual ICollection<UserFollower> Following { get; set; }
+        public virtual ICollection<SavedRecipe> SavedRecipes { get; set; }
+        public virtual ICollection<RecipeLike> LikedRecipes { get; set; }
+        public virtual ICollection<LoginAttempt> LoginAttempts { get; set; }
+        public virtual ICollection<ChefRecipeRequest> RecipeRequests { get; set; }
+        public virtual ICollection<ChefRecipeRequest> ReceivedRequests { get; set; }
     }
 }

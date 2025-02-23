@@ -8,7 +8,7 @@ namespace RecipeApp.Core.Mapping.AuthenticationMapping
     {
         public RegisterUserMapping()
         {
-            CreateMap<AddApplicationUserCommand, ApplicationUser>();
+            CreateMap<RegisterCommand, ApplicationUser>();
         }
     }
 }

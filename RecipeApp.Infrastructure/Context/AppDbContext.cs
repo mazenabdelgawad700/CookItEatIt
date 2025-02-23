@@ -22,6 +22,7 @@ namespace RecipeApp.Infrastructure.Context
         public DbSet<Ingredient> Ingredient { get; set; }
         public DbSet<Country> Country { get; set; }
         public DbSet<ChefRecipeRequest> ChefRecipeRequest { get; set; }
+        public DbSet<LoginAttempt> LoginAttempt { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

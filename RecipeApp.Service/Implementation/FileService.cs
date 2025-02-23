@@ -2,7 +2,7 @@
 using RecipeApp.Service.Abstraction;
 using RecipeApp.Shared.Bases;
 
-namespace RecipeApp.Service.Implementaion
+namespace RecipeApp.Service.Implementation
 {
     internal class FileService() : IFileService
     {

@@ -4,12 +4,12 @@ using RecipeApp.Service.Abstraction;
 
 namespace RecipeApp.Core.Features.Authentication.Command.Validtor
 {
-    public class AddApplicationUserValidator : AbstractValidator<AddApplicationUserCommand>
+    public class RegisterValidator : AbstractValidator<RegisterCommand>
     {
 
         private readonly IAuthenticationService _authenticationService;
 
-        public AddApplicationUserValidator(IAuthenticationService authenticationService)
+        public RegisterValidator(IAuthenticationService authenticationService)
         {
             _authenticationService = authenticationService;
             ApplyValidationRules();

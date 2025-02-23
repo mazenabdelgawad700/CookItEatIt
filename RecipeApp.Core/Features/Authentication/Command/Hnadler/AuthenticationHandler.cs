@@ -1,26 +1,30 @@
 ﻿using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using RecipeApp.Core.Features.Authentication.Command.Models;
 using RecipeApp.Service.Abstraction;
 using RecipeApp.Shared.Bases;
 
 namespace RecipeApp.Core.Features.Authentication.Command.Hnadler
 {
-    internal class AuthenticationHandler : IRequestHandler<LoginCommand, ReturnBase<string>>, IRequestHandler<AddApplicationUserCommand, ReturnBase<string>>,
-        IRequestHandler<ConfirmEmailCommand, ReturnBase<bool>>
+    internal class AuthenticationHandler : IRequestHandler<LoginCommand, ReturnBase<string>>, IRequestHandler<RegisterCommand, ReturnBase<string>>,
+        IRequestHandler<ConfirmEmailCommand, ReturnBase<bool>>,
+        IRequestHandler<ChangePasswordCommand, ReturnBase<bool>>
     {
         private readonly IAuthenticationService _authenticationService;
         private readonly IConfirmEmailSerivce _confirmEmailSerivce;
         private readonly IMapper _mapper;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AuthenticationHandler(IAuthenticationService authenticationService, IConfirmEmailSerivce confirmEmailSerivce, IMapper mapper)
+        public AuthenticationHandler(IAuthenticationService authenticationService, IConfirmEmailSerivce confirmEmailSerivce, IMapper mapper, IHttpContextAccessor httpContextAccessor)
         {
             _authenticationService = authenticationService;
             _mapper = mapper;
             _confirmEmailSerivce = confirmEmailSerivce;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<ReturnBase<string>> Handle(AddApplicationUserCommand request, CancellationToken cancellationToken)
+        public async Task<ReturnBase<string>> Handle(RegisterCommand request, CancellationToken cancellationToken)
         {
             try
             {
@@ -60,7 +64,12 @@ namespace RecipeApp.Core.Features.Authentication.Command.Hnadler
         {
             try
             {
-                ReturnBase<string> loginUserResult = await _authenticationService.LoginInAsync(request.Email, request.Password);
+                string? ipAddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress?.ToString();
+
+                if (ipAddress is null)
+                    ReturnBaseHandler.Failed<string>("Something went wront, Please try again");
+
+                ReturnBase<string> loginUserResult = await _authenticationService.LoginInAsync(request.Email, request.Password, ipAddress);
 
                 if (loginUserResult.Succeeded)
                     return ReturnBaseHandler.Success(loginUserResult.Data, loginUserResult.Message);
@@ -69,12 +78,35 @@ namespace RecipeApp.Core.Features.Authentication.Command.Hnadler
                 {
                     "InvalidCredentials" => ReturnBaseHandler.Failed<string>("Please, enter valid credentials"),
                     "InvalidEmailOrPassword" => ReturnBaseHandler.Failed<string>("Invalid email or password"),
-                    _ => ReturnBaseHandler.Failed<string>("Failed to log in, Please try again"),
+                    _ => ReturnBaseHandler.Failed<string>(loginUserResult.Message),
                 };
             }
             catch (Exception ex)
             {
                 return ReturnBaseHandler.Failed<string>(ex.Message);
+            }
+        }
+
+        public async Task<ReturnBase<bool>> Handle(ChangePasswordCommand request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                ReturnBase<bool> changePasswordUserResult = await _authenticationService.ChangePasswordAsync(request.Id, request.CurrentPassword, request.NewPassword);
+
+                if (changePasswordUserResult.Succeeded)
+                    return ReturnBaseHandler.Success(changePasswordUserResult.Data, changePasswordUserResult.Message);
+
+                return changePasswordUserResult.Message switch
+                {
+                    "PasswordsDoNotProvided" => ReturnBaseHandler.Failed<bool>("Please, enter required fields"),
+                    "InvalidUserId" => ReturnBaseHandler.Failed<bool>("User Not Found"),
+                    "FailedToSendChangePasswordEmail" => ReturnBaseHandler.Failed<bool>("Something went wrong. Please, try again"),
+                    _ => ReturnBaseHandler.Failed<bool>(changePasswordUserResult.Message),
+                };
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
             }
         }
     }

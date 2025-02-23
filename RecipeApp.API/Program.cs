@@ -5,6 +5,7 @@ using RecipeApp.Core;
 using RecipeApp.Core.MiddelWare;
 using RecipeApp.Infrastructure;
 using RecipeApp.Infrastructure.Context;
+using RecipeApp.Infrastructure.Middlewares;
 using RecipeApp.Service;
 
 namespace RecipeApp.API;
@@ -29,9 +30,9 @@ public class Program
         );
 
         #region Add Services To Dependency Injection
-        builder.Services.AddInfrastructureDependancies()
-            .AddServiceDependancies()
-            .AddCoreDependancies()
+        builder.Services.AddInfrastructureDependencies()
+            .AddServiceDependencies()
+            .AddCoreDependencies()
             .AddServiceRegisteration(builder.Configuration);
         #endregion
 
@@ -49,6 +50,8 @@ public class Program
         #endregion
 
         builder.Services.Configure<DataProtectionTokenProviderOptions>(opt => opt.TokenLifespan = TimeSpan.FromHours(1));
+
+        builder.Services.AddCustomRateLimiting();
 
 
         var app = builder.Build();
@@ -73,6 +76,8 @@ public class Program
         app.UseHttpsRedirection();
 
         app.UseCors(CORS);
+
+        app.UseRateLimiter();
 
         app.UseAuthentication();
         app.UseAuthorization();

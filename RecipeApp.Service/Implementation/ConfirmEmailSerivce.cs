@@ -5,7 +5,7 @@ using RecipeApp.Service.Abstraction;
 using RecipeApp.Shared.Bases;
 using System.Net;
 
-namespace RecipeApp.Service.Implementaion
+namespace RecipeApp.Service.Implementation
 {
     internal class ConfirmEmailSerivce : IConfirmEmailSerivce
     {
@@ -69,7 +69,7 @@ namespace RecipeApp.Service.Implementaion
 
                     string message = $"To Confirm Email Click Link: <a href=\"{returnUrl}\">Confirmation Link</a>";
 
-                    ReturnBase<string> sendEmailResult = await _emailService.SendEmailAsync(user.Email, message, "text/html");
+                    ReturnBase<string> sendEmailResult = await _emailService.SendEmailAsync(user.Email, message, "Confirmation Link", "text /html");
                     return ReturnBaseHandler.Success(sendEmailResult.Data == "Success", sendEmailResult.Message);
                 }
                 return ReturnBaseHandler.Failed<bool>("");
