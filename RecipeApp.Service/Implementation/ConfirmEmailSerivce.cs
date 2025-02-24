@@ -7,7 +7,7 @@ using System.Net;
 
 namespace RecipeApp.Service.Implementation
 {
-    internal class ConfirmEmailSerivce : IConfirmEmailSerivce
+    internal class ConfirmEmailSerivce : IConfirmEmailService
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IHttpContextAccessor _httpContextAccessor;

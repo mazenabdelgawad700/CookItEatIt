@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.IdentityModel.Tokens;
@@ -9,6 +10,7 @@ using RecipeApp.Infrastructure.Context;
 using RecipeApp.Service.Abstraction;
 using RecipeApp.Shared.Bases;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -21,20 +23,25 @@ namespace RecipeApp.Service.Implementation
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly JwtSettings _jwtSettings;
-        private readonly IConfirmEmailSerivce _confirmEmailSerivce;
+        private readonly IConfirmEmailService _confirmEmailService;
+        private readonly ISendEmailService _emailService;
         private readonly ISendPasswordChangeNotificationEmailService
             _sendPasswordChangeNotificationEmailService;
         private readonly AppDbContext _dbContext;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AuthenticationService(UserManager<ApplicationUser> userManager, JwtSettings jwtSettings, IConfirmEmailSerivce confirmEmailSerivce, AppDbContext dbContext, ISendPasswordChangeNotificationEmailService
-            sendPasswordChangeNotificationEmailService, SignInManager<ApplicationUser> signInManager)
+
+        public AuthenticationService(UserManager<ApplicationUser> userManager, JwtSettings jwtSettings, IConfirmEmailService confirmEmailService, AppDbContext dbContext, ISendPasswordChangeNotificationEmailService
+            sendPasswordChangeNotificationEmailService, SignInManager<ApplicationUser> signInManager, ISendEmailService emailService, IHttpContextAccessor httpContextAccessor)
         {
             _userManager = userManager;
             _jwtSettings = jwtSettings;
-            _confirmEmailSerivce = confirmEmailSerivce;
+            _confirmEmailService = confirmEmailService;
             _dbContext = dbContext;
             _sendPasswordChangeNotificationEmailService = sendPasswordChangeNotificationEmailService;
             _signInManager = signInManager;
+            _emailService = emailService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<ReturnBase<string>> LoginInAsync(string email, string password, string ipAddress)
@@ -137,7 +144,7 @@ namespace RecipeApp.Service.Implementation
 
                 if (!user.EmailConfirmed)
                 {
-                    ReturnBase<bool> sendConfirmationEmailResult = await _confirmEmailSerivce.SendConfirmationEmailAsync(user);
+                    ReturnBase<bool> sendConfirmationEmailResult = await _confirmEmailService.SendConfirmationEmailAsync(user);
                     if (sendConfirmationEmailResult.Succeeded)
                     {
                         await transaction.CommitAsync();
@@ -157,7 +164,6 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<string>("An error occurred during login.");
             }
         }
-
         public async Task<ReturnBase<string>> RegisterAsync(ApplicationUser appUser, string password)
         {
             try
@@ -166,7 +172,7 @@ namespace RecipeApp.Service.Implementation
 
                 if (createUserResult.Succeeded)
                 {
-                    ReturnBase<bool> sendConfirmationEmailResult = await _confirmEmailSerivce.SendConfirmationEmailAsync(appUser);
+                    ReturnBase<bool> sendConfirmationEmailResult = await _confirmEmailService.SendConfirmationEmailAsync(appUser);
                     if (sendConfirmationEmailResult.Data)
                     {
                         return ReturnBaseHandler.Created("", $"Confirmation Email has been sent to {appUser.Email} Please, confirm your email");
@@ -355,6 +361,48 @@ namespace RecipeApp.Service.Implementation
             JwtSecurityToken jwtToken = tokenHandler.ReadJwtToken(token);
 
             return jwtToken.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value.ToString();
+        }
+
+        public async Task<ReturnBase<bool>> SendResetPasswordEmailAsync(string email)
+        {
+            try
+            {
+                if (email is null)
+                    return ReturnBaseHandler.Failed<bool>("Email is required");
+
+                ApplicationUser? user = await _userManager.FindByEmailAsync(email);
+
+                if (user is null)
+                    return ReturnBaseHandler.Failed<bool>("User Not Found");
+
+                string resetPasswordToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+                string encodedToken = WebUtility.UrlEncode(resetPasswordToken);
+                HttpRequest requestAccessor = _httpContextAccessor.HttpContext.Request;
+
+                UriBuilder uriBuilder = new()
+                {
+                    Scheme = requestAccessor.Scheme,
+                    Host = requestAccessor.Host.Host,
+                    Port = requestAccessor.Host.Port ?? -1,
+                    Path = "api/authentication/ResetPassword",
+                    Query = $"userId={user.Id}&token={encodedToken}"
+                };
+
+                string returnUrl = uriBuilder.ToString();
+
+                string message = $"To Reset Your Password Click This Link: <a href=\"{returnUrl}\">Reset Password</a>";
+
+                ReturnBase<string> sendEmailResult = await _emailService.SendEmailAsync(user.Email, message, "Reset Password Link", "text/html");
+
+                if (sendEmailResult.Succeeded)
+                    return ReturnBaseHandler.Success(true, "Reset password email send successfully");
+
+                return ReturnBaseHandler.Failed<bool>(sendEmailResult.Message);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
+            }
         }
     }
 }

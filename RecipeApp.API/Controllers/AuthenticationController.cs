@@ -72,10 +72,18 @@ namespace RecipeApp.API.Controllers
             return NewResult(response);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
         {
             ReturnBase<string> response = await Mediator.Send(command);
+            return NewResult(response);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPasswordEmail([FromBody] ResetPasswordEmailCommand command)
+        {
+            ReturnBase<bool> response = await Mediator.Send(command);
             return NewResult(response);
         }
     }

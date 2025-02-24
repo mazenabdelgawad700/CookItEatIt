@@ -3,7 +3,7 @@ using RecipeApp.Core.Features.Authentication.Command.Models;
 
 namespace RecipeApp.Core.Features.Authentication.Command.Validator
 {
-    internal class RefreshTokenValidator : AbstractValidator<RefreshTokenCommand>
+    public class RefreshTokenValidator : AbstractValidator<RefreshTokenCommand>
     {
         public RefreshTokenValidator()
         {

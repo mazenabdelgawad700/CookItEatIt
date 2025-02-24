@@ -12,10 +12,10 @@ namespace RecipeApp.Service.Implementation
 
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly AppDbContext _dbContext;
-        private readonly IConfirmEmailSerivce _confirmEmailSerivce;
+        private readonly IConfirmEmailService _confirmEmailSerivce;
         private readonly IFileService _fileService;
 
-        public ProfilePictureService(UserManager<ApplicationUser> userManager, AppDbContext dbContext, IConfirmEmailSerivce confirmEmailSerivce, IFileService fileService)
+        public ProfilePictureService(UserManager<ApplicationUser> userManager, AppDbContext dbContext, IConfirmEmailService confirmEmailSerivce, IFileService fileService)
         {
             _dbContext = dbContext;
             _userManager = userManager;

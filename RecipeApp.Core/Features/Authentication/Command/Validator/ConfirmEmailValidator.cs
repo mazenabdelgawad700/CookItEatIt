@@ -7,10 +7,10 @@ namespace RecipeApp.Core.Features.Authentication.Command.Validtor
     {
         public ConfirmEmailValidator()
         {
-            ApplyValidionRules();
+            ApplyValidationRules();
         }
 
-        public void ApplyValidionRules()
+        public void ApplyValidationRules()
         {
             RuleFor(e => e.UserId)
                 .NotNull()

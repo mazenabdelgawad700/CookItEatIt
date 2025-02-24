@@ -13,7 +13,7 @@ namespace RecipeApp.Core.Features.ApplicationUser.Command.Handler
         IRequestHandler<UpdateProfilePictureCommand, ReturnBase<bool>>
     {
         private readonly IProfilePictureService _profilePictureService;
-        public ProfilePictureHandler(IProfilePictureService profilePictureService, IMapper mapper, IConfirmEmailSerivce confirmEmailSerivce)
+        public ProfilePictureHandler(IProfilePictureService profilePictureService, IMapper mapper, IConfirmEmailService confirmEmailSerivce)
         {
             _profilePictureService = profilePictureService;
 

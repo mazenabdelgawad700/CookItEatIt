@@ -10,14 +10,15 @@ namespace RecipeApp.Core.Features.Authentication.Command.Hnadler
     internal class AuthenticationHandler : IRequestHandler<LoginCommand, ReturnBase<string>>, IRequestHandler<RegisterCommand, ReturnBase<string>>,
         IRequestHandler<ConfirmEmailCommand, ReturnBase<bool>>,
         IRequestHandler<ChangePasswordCommand, ReturnBase<bool>>,
-        IRequestHandler<RefreshTokenCommand, ReturnBase<string>>
+        IRequestHandler<RefreshTokenCommand, ReturnBase<string>>,
+        IRequestHandler<ResetPasswordEmailCommand, ReturnBase<bool>>
     {
         private readonly IAuthenticationService _authenticationService;
-        private readonly IConfirmEmailSerivce _confirmEmailSerivce;
+        private readonly IConfirmEmailService _confirmEmailSerivce;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AuthenticationHandler(IAuthenticationService authenticationService, IConfirmEmailSerivce confirmEmailSerivce, IMapper mapper, IHttpContextAccessor httpContextAccessor)
+        public AuthenticationHandler(IAuthenticationService authenticationService, IConfirmEmailService confirmEmailSerivce, IMapper mapper, IHttpContextAccessor httpContextAccessor)
         {
             _authenticationService = authenticationService;
             _mapper = mapper;
@@ -132,6 +133,26 @@ namespace RecipeApp.Core.Features.Authentication.Command.Hnadler
             catch (Exception ex)
             {
                 return ReturnBaseHandler.Failed<string>(ex.Message);
+            }
+        }
+
+        public async Task<ReturnBase<bool>> Handle(ResetPasswordEmailCommand request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (request.Email is null)
+                    return ReturnBaseHandler.Failed<bool>("Email is required");
+
+                ReturnBase<bool> sendResetPasswordEmailResult = await _authenticationService.SendResetPasswordEmailAsync(request.Email);
+
+                if (sendResetPasswordEmailResult.Succeeded)
+                    return ReturnBaseHandler.Success(sendResetPasswordEmailResult.Data, sendResetPasswordEmailResult.Message);
+
+                return ReturnBaseHandler.Failed<bool>(sendResetPasswordEmailResult.Message);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
             }
         }
     }

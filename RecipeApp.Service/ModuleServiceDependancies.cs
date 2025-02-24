@@ -10,7 +10,7 @@ public static class ModuleServiceDependencies
     {
         services.AddTransient<IProfilePictureService, ProfilePictureService>();
         services.AddTransient<ISendEmailService, SendEmailService>();
-        services.AddTransient<IConfirmEmailSerivce, ConfirmEmailSerivce>();
+        services.AddTransient<IConfirmEmailService, ConfirmEmailSerivce>();
         services.AddTransient<IAuthenticationService, AuthenticationService>();
         services.AddTransient<IFileService, FileService>();
         services.AddTransient<ISendPasswordChangeNotificationEmailService, SendPasswordChangeNotificationEmailService>();

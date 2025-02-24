@@ -10,5 +10,6 @@ namespace RecipeApp.Service.Abstraction
         Task<ReturnBase<bool>> ChangePasswordAsync(int userId, string currentPassword, string newPassword);
         Task<ReturnBase<bool>> IsEmailAlreadyRegisteredAsync(string email);
         Task<ReturnBase<string>> RefreshTokenAsync(string accessToken);
+        Task<ReturnBase<bool>> SendResetPasswordEmailAsync(string email);
     }
 }
