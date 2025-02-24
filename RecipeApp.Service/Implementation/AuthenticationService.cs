@@ -52,7 +52,7 @@ namespace RecipeApp.Service.Implementation
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
                 return ReturnBaseHandler.Failed<string>("InvalidCredentials");
 
-            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            await using IDbContextTransaction transaction = await _dbContext.Database.BeginTransactionAsync();
 
             try
             {
@@ -86,7 +86,7 @@ namespace RecipeApp.Service.Implementation
 
                 if (!isPasswordCorrect)
                 {
-                    if (loginAttempt != null)
+                    if (loginAttempt is not null)
                     {
                         loginAttempt.AttemptCount++;
 
@@ -117,14 +117,14 @@ namespace RecipeApp.Service.Implementation
                     return ReturnBaseHandler.Failed<string>("InvalidEmailOrPassword");
                 }
 
-                if (loginAttempt != null)
+                if (loginAttempt is not null)
                 {
                     loginAttempt.AttemptCount = 0;
                     loginAttempt.IsBlocked = false;
                     loginAttempt.LastAttemptTime = DateTime.UtcNow;
                 }
 
-                await _dbContext.SaveChangesAsync();
+
 
                 string jwtId = Guid.NewGuid().ToString();
                 string token = GenerateJwtToken(user.UserName!, user.Id, jwtId);
@@ -141,9 +141,22 @@ namespace RecipeApp.Service.Implementation
                     ExpiresAt = DateTime.UtcNow.AddMonths(_jwtSettings.RefreshTokenExpireDate)
                 };
 
-                await _dbContext.UserRefreshToken.AddAsync(newRefreshToken);
-                await _dbContext.SaveChangesAsync();
+                ApplicationUserRefreshToken? existingRefreshTokenRecord = await _dbContext.UserRefreshToken
+                    .FirstOrDefaultAsync(rt => rt.UserId == user.Id);
 
+                if (existingRefreshTokenRecord is null)
+                {
+                    await _dbContext.UserRefreshToken.AddAsync(newRefreshToken);
+                }
+                else
+                {
+                    existingRefreshTokenRecord.RefreshToken = GenerateRefreshToken();
+                    existingRefreshTokenRecord.IsUsed = true;
+                    existingRefreshTokenRecord.CreatedAt = DateTime.UtcNow;
+                    existingRefreshTokenRecord.ExpiresAt = DateTime.UtcNow.AddMonths(_jwtSettings.RefreshTokenExpireDate);
+
+                    _dbContext.UserRefreshToken.Update(existingRefreshTokenRecord);
+                }
 
                 if (!user.EmailConfirmed)
                 {
@@ -156,6 +169,7 @@ namespace RecipeApp.Service.Implementation
                     }
                 }
 
+                await _dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
                 await transaction.DisposeAsync();
                 return ReturnBaseHandler.Success(token, "Logged in successfully");
@@ -314,12 +328,17 @@ namespace RecipeApp.Service.Implementation
                     return ReturnBaseHandler.Failed<string>("Your session has expired. please log in again.");
 
                 if (storedRefreshToken.ExpiresAt < DateTime.UtcNow)
+                {
+                    storedRefreshToken.IsRevoked = true;
+                    _dbContext.UserRefreshToken.Update(storedRefreshToken);
+                    await _dbContext.SaveChangesAsync();
                     return ReturnBaseHandler.Failed<string>("Your session has expired. please log in again.");
+                }
 
                 if (!storedRefreshToken.IsUsed)
                 {
                     storedRefreshToken.IsUsed = true;
-                    await _dbContext.SaveChangesAsync();
+                    _dbContext.UserRefreshToken.Update(storedRefreshToken);
                 }
 
                 ApplicationUser? user = await _userManager.FindByIdAsync(userId);
@@ -332,6 +351,7 @@ namespace RecipeApp.Service.Implementation
                 string newAccessToken = GenerateJwtToken(user.UserName!, user.Id, newJwtId);
 
                 storedRefreshToken.JwtId = newJwtId;
+
                 await _dbContext.SaveChangesAsync();
 
                 if (newAccessToken is null)
@@ -407,7 +427,6 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<bool>(ex.Message);
             }
         }
-
         public async Task<ReturnBase<bool>> ResetPasswordAsync(string resetPasswordToken, string newPassword, string email)
         {
             try
