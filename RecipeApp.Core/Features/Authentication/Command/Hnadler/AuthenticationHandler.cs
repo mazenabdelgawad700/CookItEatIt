@@ -11,18 +11,19 @@ namespace RecipeApp.Core.Features.Authentication.Command.Hnadler
         IRequestHandler<ConfirmEmailCommand, ReturnBase<bool>>,
         IRequestHandler<ChangePasswordCommand, ReturnBase<bool>>,
         IRequestHandler<RefreshTokenCommand, ReturnBase<string>>,
-        IRequestHandler<ResetPasswordEmailCommand, ReturnBase<bool>>
+        IRequestHandler<ResetPasswordEmailCommand, ReturnBase<bool>>,
+        IRequestHandler<ResetPasswordCommand, ReturnBase<bool>>
     {
         private readonly IAuthenticationService _authenticationService;
-        private readonly IConfirmEmailService _confirmEmailSerivce;
+        private readonly IConfirmEmailService _confirmEmailService;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AuthenticationHandler(IAuthenticationService authenticationService, IConfirmEmailService confirmEmailSerivce, IMapper mapper, IHttpContextAccessor httpContextAccessor)
+        public AuthenticationHandler(IAuthenticationService authenticationService, IConfirmEmailService confirmEmailService, IMapper mapper, IHttpContextAccessor httpContextAccessor)
         {
             _authenticationService = authenticationService;
             _mapper = mapper;
-            _confirmEmailSerivce = confirmEmailSerivce;
+            _confirmEmailService = confirmEmailService;
             _httpContextAccessor = httpContextAccessor;
         }
 
@@ -49,7 +50,7 @@ namespace RecipeApp.Core.Features.Authentication.Command.Hnadler
         {
             try
             {
-                ReturnBase<bool> confrimEmailResult = await _confirmEmailSerivce.ConfirmEmailAsync(request.UserId, request.Token);
+                ReturnBase<bool> confrimEmailResult = await _confirmEmailService.ConfirmEmailAsync(request.UserId, request.Token);
 
                 if (confrimEmailResult.Succeeded)
                 {
@@ -149,6 +150,31 @@ namespace RecipeApp.Core.Features.Authentication.Command.Hnadler
                     return ReturnBaseHandler.Success(sendResetPasswordEmailResult.Data, sendResetPasswordEmailResult.Message);
 
                 return ReturnBaseHandler.Failed<bool>(sendResetPasswordEmailResult.Message);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
+            }
+        }
+        public async Task<ReturnBase<bool>> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (request.ResetPasswordToken is null)
+                    return ReturnBaseHandler.Failed<bool>("Invalid Token");
+
+                if (request.NewPassword is null)
+                    return ReturnBaseHandler.Failed<bool>("Invalid Password");
+
+                if (request.Email is null)
+                    return ReturnBaseHandler.Failed<bool>("Invalid Email");
+
+                ReturnBase<bool> resetPasswordResult = await _authenticationService.ResetPasswordAsync(request.ResetPasswordToken, request.NewPassword, request.Email);
+
+                if (resetPasswordResult.Succeeded)
+                    return ReturnBaseHandler.Success(resetPasswordResult.Data, resetPasswordResult.Message);
+
+                return ReturnBaseHandler.Failed<bool>(resetPasswordResult.Message);
             }
             catch (Exception ex)
             {

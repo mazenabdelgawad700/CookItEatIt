@@ -49,7 +49,10 @@ public class Program
         });
         #endregion
 
-        builder.Services.Configure<DataProtectionTokenProviderOptions>(opt => opt.TokenLifespan = TimeSpan.FromHours(1));
+        builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+        {
+            options.TokenLifespan = TimeSpan.FromMinutes(30);
+        });
 
         builder.Services.AddCustomRateLimiting();
 

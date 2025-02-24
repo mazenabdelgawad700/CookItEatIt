@@ -19,7 +19,7 @@ namespace RecipeApp.Service.Implementation
 {
     internal class AuthenticationService : IAuthenticationService
     {
-
+        #region Fields
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly JwtSettings _jwtSettings;
@@ -29,8 +29,9 @@ namespace RecipeApp.Service.Implementation
             _sendPasswordChangeNotificationEmailService;
         private readonly AppDbContext _dbContext;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        #endregion
 
-
+        #region Constructors
         public AuthenticationService(UserManager<ApplicationUser> userManager, JwtSettings jwtSettings, IConfirmEmailService confirmEmailService, AppDbContext dbContext, ISendPasswordChangeNotificationEmailService
             sendPasswordChangeNotificationEmailService, SignInManager<ApplicationUser> signInManager, ISendEmailService emailService, IHttpContextAccessor httpContextAccessor)
         {
@@ -43,7 +44,9 @@ namespace RecipeApp.Service.Implementation
             _emailService = emailService;
             _httpContextAccessor = httpContextAccessor;
         }
+        #endregion
 
+        #region Handle Functions
         public async Task<ReturnBase<string>> LoginInAsync(string email, string password, string ipAddress)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
@@ -385,14 +388,14 @@ namespace RecipeApp.Service.Implementation
                     Host = requestAccessor.Host.Host,
                     Port = requestAccessor.Host.Port ?? -1,
                     Path = "api/authentication/ResetPassword",
-                    Query = $"userId={user.Id}&token={encodedToken}"
+                    Query = $"email={Uri.EscapeDataString(email)}&token={encodedToken}"
                 };
 
                 string returnUrl = uriBuilder.ToString();
 
                 string message = $"To Reset Your Password Click This Link: <a href=\"{returnUrl}\">Reset Password</a>";
 
-                ReturnBase<string> sendEmailResult = await _emailService.SendEmailAsync(user.Email, message, "Reset Password Link", "text/html");
+                ReturnBase<string> sendEmailResult = await _emailService.SendEmailAsync(email, message, "Reset Password Link", "text/html");
 
                 if (sendEmailResult.Succeeded)
                     return ReturnBaseHandler.Success(true, "Reset password email send successfully");
@@ -404,5 +407,33 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<bool>(ex.Message);
             }
         }
+
+        public async Task<ReturnBase<bool>> ResetPasswordAsync(string resetPasswordToken, string newPassword, string email)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(resetPasswordToken))
+                    return ReturnBaseHandler.Failed<bool>("Invalid Token");
+
+                ApplicationUser? user = await _userManager.FindByEmailAsync(email);
+
+                if (user is null)
+                    return ReturnBaseHandler.Failed<bool>("User Not Found");
+
+                string decodedToken = WebUtility.UrlDecode(resetPasswordToken);
+
+                IdentityResult resetPasswordResult = await _userManager.ResetPasswordAsync(user, decodedToken, newPassword);
+
+                if (resetPasswordResult.Succeeded)
+                    return ReturnBaseHandler.Success(true, "Password has been reset successfully");
+
+                return ReturnBaseHandler.Failed<bool>(resetPasswordResult.Errors.FirstOrDefault().Description);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
+            }
+        }
+        #endregion
     }
 }

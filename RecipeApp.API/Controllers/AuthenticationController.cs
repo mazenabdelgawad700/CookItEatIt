@@ -86,5 +86,12 @@ namespace RecipeApp.API.Controllers
             ReturnBase<bool> response = await Mediator.Send(command);
             return NewResult(response);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
+        {
+            ReturnBase<bool> response = await Mediator.Send(command);
+            return NewResult(response);
+        }
     }
 }
