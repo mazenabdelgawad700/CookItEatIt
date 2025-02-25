@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using RecipeApp.Infrastructure.Context;
+using RecipeApp.Shared.Bases;
 namespace RecipeApp.Infrastructure.InfrastructureBases
 {
     public class GenericRepositoryAsync<T> : IGenericRepositoryAsync<T> where T : class
@@ -14,7 +15,7 @@ namespace RecipeApp.Infrastructure.InfrastructureBases
             _dbSet = _dbContext.Set<T>();
         }
 
-        public async Task AddAsync(T entity)
+        public async Task<ReturnBase<bool>> AddAsync(T entity)
         {
             try
             {
@@ -23,13 +24,14 @@ namespace RecipeApp.Infrastructure.InfrastructureBases
                     await _dbSet.AddAsync(entity);
                     await _dbContext.SaveChangesAsync();
                 }
+                return ReturnBaseHandler.Success(true, "");
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message, ex);
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
             }
         }
-        public async Task AddRangeAsync(ICollection<T> entities)
+        public async Task<ReturnBase<bool>> AddRangeAsync(ICollection<T> entities)
         {
             try
             {
@@ -38,107 +40,121 @@ namespace RecipeApp.Infrastructure.InfrastructureBases
                     await _dbSet.AddRangeAsync(entities);
                     await _dbContext.SaveChangesAsync();
                 }
+                return ReturnBaseHandler.Success(true, "");
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message, ex);
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
             }
         }
-        public IDbContextTransaction BeginTransaction()
+        public async Task<IDbContextTransaction> BeginTransactionAsync()
         {
-            return _dbContext.Database.BeginTransaction();
+            return await _dbContext.Database.BeginTransactionAsync();
         }
-        public void Commit()
+        public async Task CommitAsync()
         {
-            _dbContext.Database.CommitTransaction();
+            await _dbContext.Database.CommitTransactionAsync();
         }
-        public async Task DeleteAsync(int id)
+        public async Task<ReturnBase<bool>> DeleteAsync(int id)
         {
             try
             {
-                var entity = await GetByIdAsync(id);
-                _dbSet.Remove(entity);
+                ReturnBase<T> getEntity = await GetByIdAsync(id);
+                if (getEntity.Data is null)
+                    return ReturnBaseHandler.Failed<bool>(getEntity.Message);
+
+                _dbSet.Remove(getEntity.Data);
                 await _dbContext.SaveChangesAsync();
+
+                return ReturnBaseHandler.Success(true, "");
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message, ex);
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
             }
         }
-        public async Task DeleteRangeAsync(ICollection<T> entities)
+        public async Task<ReturnBase<bool>> DeleteRangeAsync(ICollection<T> entities)
         {
             try
             {
+                if (entities is null)
+                    return ReturnBaseHandler.Failed<bool>("Entities is null");
+
                 _dbSet.RemoveRange(entities);
                 await _dbContext.SaveChangesAsync();
+
+                return ReturnBaseHandler.Success(true, "");
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message, ex);
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
             }
         }
-        public async Task<T> GetByIdAsync(int id)
+        public async Task<ReturnBase<T>> GetByIdAsync(int id)
         {
             try
             {
                 if (id > 0)
                 {
-                    var entity = await _dbSet.FindAsync(id);
+                    T? entity = await _dbSet.FindAsync(id);
                     if (entity is not null)
-                        return entity;
-                    throw new Exception("Invalid Id");
+                        return ReturnBaseHandler.Success(entity, "");
+
+                    return ReturnBaseHandler.Failed<T>("Invalid Id");
                 }
-                throw new Exception("Invalid Id");
+                return ReturnBaseHandler.Failed<T>("Invalid Id");
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message, ex);
+                return ReturnBaseHandler.Failed<T>(ex.Message);
             }
         }
-        public IQueryable<T> GetTableAsTracking()
+        public ReturnBase<IQueryable<T>> GetTableAsTracking()
         {
             try
             {
-                return _dbSet.AsTracking().AsQueryable();
+                return ReturnBaseHandler.Success(_dbSet.AsTracking().AsQueryable(), "");
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message, ex);
+                return ReturnBaseHandler.Failed<IQueryable<T>>(ex.Message);
             }
         }
-        public IQueryable<T> GetTableNoTracking()
+        public ReturnBase<IQueryable<T>> GetTableNoTracking()
         {
             try
             {
-                return _dbSet.AsNoTracking().AsQueryable();
+                return ReturnBaseHandler.Success(_dbSet.AsNoTracking().AsQueryable(), "");
             }
             catch (Exception ex)
             {
-                throw new Exception($"{ex.Message}", ex);
+                return ReturnBaseHandler.Failed<IQueryable<T>>(ex.Message);
             }
         }
-        public async Task UpdateAsync(T entity)
+        public async Task<ReturnBase<bool>> UpdateAsync(T entity)
         {
             try
             {
                 _dbSet.Update(entity);
                 await _dbContext.SaveChangesAsync();
+                return ReturnBaseHandler.Success(true, "");
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message, ex);
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
             }
         }
-        public async Task UpdateRangeAsync(ICollection<T> entities)
+        public async Task<ReturnBase<bool>> UpdateRangeAsync(ICollection<T> entities)
         {
             try
             {
                 _dbSet.UpdateRange(entities);
                 await _dbContext.SaveChangesAsync();
+                return ReturnBaseHandler.Success(true, "");
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message, ex);
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
             }
         }
         public async Task SaveChangesAsync()
@@ -152,11 +168,11 @@ namespace RecipeApp.Infrastructure.InfrastructureBases
                 throw new Exception(ex.Message, ex);
             }
         }
-        public void Rollback()
+        public async Task RollbackAsync()
         {
             try
             {
-                _dbContext.Database.RollbackTransaction();
+                await _dbContext.Database.RollbackTransactionAsync();
             }
             catch (Exception ex)
             {

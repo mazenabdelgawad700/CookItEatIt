@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RecipeApp.API.Base;
-using RecipeApp.Core.Features.ApplicationUser.Command.Model;
+using RecipeApp.Core.Features.ProfilePicture.Command.Model;
 using RecipeApp.Shared.Bases;
 using System.Net;
 

@@ -10,6 +10,9 @@ namespace RecipeApp.Domain.Entities.Identity
         public byte PreferredTheme { get; set; }
         public string? ProfilePictureURL { get; set; }
         public string? Bio { get; set; }
+        public int RecipesCount { get; set; }
+        public int FollowersCount { get; set; }
+        public int FollowingCount { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
         public virtual Country? Country { get; set; }

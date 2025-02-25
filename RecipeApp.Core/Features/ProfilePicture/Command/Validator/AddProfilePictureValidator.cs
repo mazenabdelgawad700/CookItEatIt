@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
-using RecipeApp.Core.Features.ApplicationUser.Command.Model;
+using RecipeApp.Core.Features.ProfilePicture.Command.Model;
 
-namespace RecipeApp.Core.Features.ApplicationUser.Command.Validator
+namespace RecipeApp.Core.Features.ProfilePicture.Command.Validator
 {
     internal class AddProfilePictureValidator : AbstractValidator<AddProfilePictureCommand>
     {

@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
 using MediatR;
-using RecipeApp.Core.Features.ApplicationUser.Command.Model;
+using RecipeApp.Core.Features.ProfilePicture.Command.Model;
 using RecipeApp.Service.Abstraction;
 using RecipeApp.Shared.Bases;
 
-namespace RecipeApp.Core.Features.ApplicationUser.Command.Handler
+namespace RecipeApp.Core.Features.ProfilePicture.Command.Handler
 {
     internal class ProfilePictureHandler :
 

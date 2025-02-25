@@ -23,7 +23,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\Authentication\Queries\" />
+    <Folder Include="Features\ApplicationUserFeature\Command\Handler\" />
+    <Folder Include="Features\ApplicationUserFeature\Command\Validator\" />
+    <Folder Include="Features\Authentication\Query\" />
   </ItemGroup>
 
 </Project>

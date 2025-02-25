@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using RecipeApp.Shared.Bases;
 
-namespace RecipeApp.Core.Features.ApplicationUser.Command.Model
+namespace RecipeApp.Core.Features.ProfilePicture.Command.Model
 {
     public class DeleteProfilePictureCommand : IRequest<ReturnBase<bool>>
     {

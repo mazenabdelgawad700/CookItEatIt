@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using RecipeApp.Shared.Bases;
 
-namespace RecipeApp.Core.Features.ApplicationUser.Command.Model
+namespace RecipeApp.Core.Features.ProfilePicture.Command.Model
 {
     public class AddProfilePictureCommand : IRequest<ReturnBase<bool>>
     {

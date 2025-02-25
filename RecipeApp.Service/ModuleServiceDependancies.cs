@@ -13,6 +13,7 @@ public static class ModuleServiceDependencies
         services.AddTransient<IConfirmEmailService, ConfirmEmailSerivce>();
         services.AddTransient<IAuthenticationService, AuthenticationService>();
         services.AddTransient<IFileService, FileService>();
+        services.AddTransient<IApplicationUserService, ApplicationUserService>();
         services.AddTransient<ISendPasswordChangeNotificationEmailService, SendPasswordChangeNotificationEmailService>();
         return services;
     }

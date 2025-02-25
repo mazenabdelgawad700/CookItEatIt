@@ -15,6 +15,10 @@ namespace RecipeApp.Infrastructure.Configurations
                    .IsRequired()
                    .HasMaxLength(256);
 
+            builder.Property(x => x.UserName)
+                   .IsRequired()
+                   .HasMaxLength(256);
+
             builder.Property(x => x.ProfilePictureURL)
                    .HasMaxLength(500);
 
@@ -27,6 +31,18 @@ namespace RecipeApp.Infrastructure.Configurations
             builder.Property(x => x.IsVerifiedChef)
                    .IsRequired()
                    .HasDefaultValue(false);
+
+            builder.Property(u => u.RecipesCount)
+                   .HasDefaultValue(0)
+                   .IsRequired();
+
+            builder.Property(u => u.FollowersCount)
+                   .HasDefaultValue(0)
+                   .IsRequired();
+
+            builder.Property(u => u.FollowingCount)
+                   .HasDefaultValue(0)
+                   .IsRequired();
 
             // Relationship with Followers
             builder.HasMany(x => x.Followers)
