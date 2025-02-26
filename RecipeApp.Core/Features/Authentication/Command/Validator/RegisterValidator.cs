@@ -18,11 +18,17 @@ namespace RecipeApp.Core.Features.Authentication.Command.Validtor
 
         private void ApplyValidationRules()
         {
-            RuleFor(x => x.Email)
+            RuleFor(x => x.UserName)
+                .NotNull()
+                .WithMessage("UserName can not be null")
                 .NotEmpty()
-                .WithMessage("Email address is required")
+                .WithMessage("UserName is required");
+
+            RuleFor(x => x.Email)
                 .NotNull()
                 .WithMessage("Email address can not be null")
+                .NotEmpty()
+                .WithMessage("Email address is required")
                 .Matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")
                 .WithMessage("Email address is not valid");
 
@@ -39,7 +45,7 @@ namespace RecipeApp.Core.Features.Authentication.Command.Validtor
             RuleFor(x => x.Email).MustAsync(async (key, CancellationToken) =>
             {
                 var result = await _authenticationService.IsEmailAlreadyRegisteredAsync(key);
-                return !result.Data;
+                return !result.Succeeded;
             }).WithMessage("Email is already used");
         }
     }

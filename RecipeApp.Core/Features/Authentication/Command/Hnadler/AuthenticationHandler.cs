@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using RecipeApp.Core.Features.Authentication.Command.Models;
 using RecipeApp.Service.Abstraction;
 using RecipeApp.Shared.Bases;
+using System.Net;
 
 namespace RecipeApp.Core.Features.Authentication.Command.Hnadler
 {
@@ -39,7 +40,12 @@ namespace RecipeApp.Core.Features.Authentication.Command.Hnadler
                 {
                     return ReturnBaseHandler.Created("", createUserResult.Message);
                 }
-                return ReturnBaseHandler.Failed<string>("Failed to add user.");
+
+                return createUserResult.Message switch
+                {
+                    "DuplicateUserName" => ReturnBaseHandler.Failed<string>("User Name already used"),
+                    _ => ReturnBaseHandler.Failed<string>(createUserResult.Message),
+                };
             }
             catch (Exception ex)
             {
@@ -54,7 +60,7 @@ namespace RecipeApp.Core.Features.Authentication.Command.Hnadler
 
                 if (confrimEmailResult.Succeeded)
                 {
-                    return ReturnBaseHandler.Created(true, confrimEmailResult.Message);
+                    return ReturnBaseHandler.Success(true, confrimEmailResult.Message);
                 }
                 return ReturnBaseHandler.Failed<bool>(confrimEmailResult.Message);
             }
@@ -77,12 +83,21 @@ namespace RecipeApp.Core.Features.Authentication.Command.Hnadler
                 if (loginUserResult.Succeeded)
                     return ReturnBaseHandler.Success(loginUserResult.Data, loginUserResult.Message);
 
-                return loginUserResult.Message switch
+                if (loginUserResult.Message.Equals("InvalidCredentials"))
+                    return ReturnBaseHandler.Failed<string>("Please, enter valid credentials");
+
+                else if (loginUserResult.Message.Equals("InvalidEmailOrPassword"))
+                    return ReturnBaseHandler.Failed<string>("Invalid email or password");
+
+                else
                 {
-                    "InvalidCredentials" => ReturnBaseHandler.Failed<string>("Please, enter valid credentials"),
-                    "InvalidEmailOrPassword" => ReturnBaseHandler.Failed<string>("Invalid email or password"),
-                    _ => ReturnBaseHandler.Failed<string>(loginUserResult.Message),
-                };
+                    return loginUserResult.StatusCode switch
+                    {
+                        HttpStatusCode.BadRequest => ReturnBaseHandler.BadRequest<string>(loginUserResult.Message),
+                        _ => ReturnBaseHandler.Failed<string>(loginUserResult.Message)
+                    };
+                }
+
             }
             catch (Exception ex)
             {

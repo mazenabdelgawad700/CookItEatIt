@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using RecipeApp.Infrastructure.Abstracts;
 using RecipeApp.Infrastructure.InfrastructureBases;
+using RecipeApp.Infrastructure.Repositories;
 
 namespace RecipeApp.Infrastructure;
 
@@ -8,11 +10,7 @@ public static class ModuleInfrastructureDependencies
     public static IServiceCollection AddInfrastructureDependencies
         (this IServiceCollection services)
     {
-        //services.AddTransient<IStudentRepository, StudentRepository>();
-        //services.AddTransient<IDepartmentRepository, DepartmentRepository>();
-        //services.AddTransient<ISubjectsRepository, SubjectsRepository>();
-        //services.AddTransient<IInstructorRepository, InstructorRepository>();
-        //services.AddTransient<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddTransient<IApplicationUserRepository, ApplicationUserRepository>();
 
         services.AddTransient(typeof(IGenericRepositoryAsync<>), typeof(GenericRepositoryAsync<>));
 

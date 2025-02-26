@@ -9,26 +9,28 @@ namespace RecipeApp.Infrastructure.Configurations
     {
         public void Configure(EntityTypeBuilder<ApplicationUser> builder)
         {
-            builder.HasKey(x => x.Id);
+            builder.HasKey(u => u.Id);
 
-            builder.Property(x => x.Email)
+            builder.Property(u => u.Email)
                    .IsRequired()
                    .HasMaxLength(256);
 
-            builder.Property(x => x.UserName)
+            builder.HasIndex(u => u.Email).IsUnique();
+
+            builder.Property(u => u.UserName)
                    .IsRequired()
                    .HasMaxLength(256);
 
-            builder.Property(x => x.ProfilePictureURL)
+            builder.Property(u => u.ProfilePictureURL)
                    .HasMaxLength(500);
 
-            builder.Property(x => x.PreferredTheme)
+            builder.Property(u => u.PreferredTheme)
                    .HasDefaultValue(1);
 
-            builder.Property(x => x.Bio)
+            builder.Property(u => u.Bio)
                    .HasMaxLength(1000);
 
-            builder.Property(x => x.IsVerifiedChef)
+            builder.Property(u => u.IsVerifiedChef)
                    .IsRequired()
                    .HasDefaultValue(false);
 
@@ -45,20 +47,20 @@ namespace RecipeApp.Infrastructure.Configurations
                    .IsRequired();
 
             // Relationship with Followers
-            builder.HasMany(x => x.Followers)
-                   .WithOne(x => x.Following)
-                   .HasForeignKey(x => x.FollowingId)
+            builder.HasMany(u => u.Followers)
+                   .WithOne(u => u.Following)
+                   .HasForeignKey(u => u.FollowingId)
                    .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasMany(x => x.Following)
-                   .WithOne(x => x.Follower)
-                   .HasForeignKey(x => x.FollowerId)
+            builder.HasMany(u => u.Following)
+                   .WithOne(u => u.Follower)
+                   .HasForeignKey(u => u.FollowerId)
                    .OnDelete(DeleteBehavior.Restrict);
 
             // Relationship with Saved Recipes
-            builder.HasMany(x => x.SavedRecipes)
-                   .WithOne(x => x.User)
-                   .HasForeignKey(x => x.UserId)
+            builder.HasMany(u => u.SavedRecipes)
+                   .WithOne(sr => sr.User)
+                   .HasForeignKey(sr => sr.UserId)
                    .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(u => u.Preferences)

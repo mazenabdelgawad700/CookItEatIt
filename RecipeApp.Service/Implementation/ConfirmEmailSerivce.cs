@@ -69,14 +69,13 @@ namespace RecipeApp.Service.Implementation
 
                     string message = $"To Confirm Email Click Link: <a href=\"{returnUrl}\">Confirmation Link</a>";
 
-                    ReturnBase<string> sendEmailResult = await _emailService.SendEmailAsync(user.Email, message, "Confirmation Link", "text /html");
+                    ReturnBase<string> sendEmailResult = await _emailService.SendEmailAsync(user.Email, message, "Confirmation Link", "text/html");
                     return ReturnBaseHandler.Success(sendEmailResult.Data == "Success", sendEmailResult.Message);
                 }
                 return ReturnBaseHandler.Failed<bool>("");
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
                 return ReturnBaseHandler.Failed<bool>(ex.Message);
             }
         }

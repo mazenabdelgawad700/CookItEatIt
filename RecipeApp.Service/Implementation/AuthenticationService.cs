@@ -46,7 +46,7 @@ namespace RecipeApp.Service.Implementation
         }
         #endregion
 
-        #region Handle Functions
+        #region Authentication Handle Functions
         public async Task<ReturnBase<string>> LoginInAsync(string email, string password, string ipAddress)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
@@ -165,7 +165,7 @@ namespace RecipeApp.Service.Implementation
                     {
                         await transaction.CommitAsync();
                         await transaction.DisposeAsync();
-                        return ReturnBaseHandler.Success(token, $"Confirmation Email has been sent to {user.Email}. Please confirm your email.");
+                        return ReturnBaseHandler.BadRequest<string>($"A Confirmation Email has been sent to {user.Email}. Please confirm your email first and then log in.");
                     }
                 }
 
@@ -177,8 +177,7 @@ namespace RecipeApp.Service.Implementation
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                Console.WriteLine(ex.Message);
-                return ReturnBaseHandler.Failed<string>("An error occurred during login.");
+                return ReturnBaseHandler.Failed<string>(ex.Message);
             }
         }
         public async Task<ReturnBase<string>> RegisterAsync(ApplicationUser appUser, string password)
@@ -196,11 +195,11 @@ namespace RecipeApp.Service.Implementation
                     }
                     return ReturnBaseHandler.Created("", "We could not send a confirmation email to you, please log in to confirm your email!");
                 }
-                return ReturnBaseHandler.Failed<string>("An error occurred while creating user.");
+                return ReturnBaseHandler.Failed<string>(createUserResult.Errors.FirstOrDefault().Code);
             }
             catch (Exception ex)
             {
-                return ReturnBaseHandler.Failed<string>($"{ex.Message}");
+                return ReturnBaseHandler.Failed<string>(ex.Message);
             }
         }
         public async Task<ReturnBase<bool>> ChangePasswordAsync(int userId, string currentPassword, string newPassword)
@@ -252,19 +251,110 @@ namespace RecipeApp.Service.Implementation
                     return ReturnBaseHandler.BadRequest<bool>("Email is required.");
                 }
 
-                ApplicationUser? user = await _userManager.FindByEmailAsync(email);
+                ApplicationUser? user = await _dbContext.ApplicationUser.Where(u => u.Email.Equals(email)).FirstOrDefaultAsync();
+
                 if (user is not null)
                 {
                     return ReturnBaseHandler.Success(true, "Email is already registered.");
                 }
-                return ReturnBaseHandler.Success(false, "Email is available.");
+                return ReturnBaseHandler.Failed<bool>();
             }
             catch (Exception ex)
             {
-                return ReturnBaseHandler.Failed<bool>($"An error occurred: {ex.Message}");
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
             }
         }
+        public async Task<ReturnBase<bool>> IsUserNameAlreadyExistAsync(string userName)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(userName))
+                {
+                    return ReturnBaseHandler.BadRequest<bool>("User Name is required.");
+                }
 
+                ApplicationUser? user = await _userManager.FindByNameAsync(userName);
+                if (user is not null)
+                {
+                    return ReturnBaseHandler.Success(true, "User Name already used.");
+                }
+                return ReturnBaseHandler.Failed<bool>();
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
+            }
+        }
+        public async Task<ReturnBase<bool>> SendResetPasswordEmailAsync(string email)
+        {
+            try
+            {
+                if (email is null)
+                    return ReturnBaseHandler.Failed<bool>("Email is required");
+
+                ApplicationUser? user = await _userManager.FindByEmailAsync(email);
+
+                if (user is null)
+                    return ReturnBaseHandler.Failed<bool>("User Not Found");
+
+                string resetPasswordToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+                string encodedToken = WebUtility.UrlEncode(resetPasswordToken);
+                HttpRequest requestAccessor = _httpContextAccessor.HttpContext.Request;
+
+                UriBuilder uriBuilder = new()
+                {
+                    Scheme = requestAccessor.Scheme,
+                    Host = requestAccessor.Host.Host,
+                    Port = requestAccessor.Host.Port ?? -1,
+                    Path = "api/authentication/ResetPassword",
+                    Query = $"email={Uri.EscapeDataString(email)}&token={encodedToken}"
+                };
+
+                string returnUrl = uriBuilder.ToString();
+
+                string message = $"To Reset Your Password Click This Link: <a href=\"{returnUrl}\">Reset Password</a>";
+
+                ReturnBase<string> sendEmailResult = await _emailService.SendEmailAsync(email, message, "Reset Password Link", "text/html");
+
+                if (sendEmailResult.Succeeded)
+                    return ReturnBaseHandler.Success(true, "Reset password email send successfully");
+
+                return ReturnBaseHandler.Failed<bool>(sendEmailResult.Message);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
+            }
+        }
+        public async Task<ReturnBase<bool>> ResetPasswordAsync(string resetPasswordToken, string newPassword, string email)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(resetPasswordToken))
+                    return ReturnBaseHandler.Failed<bool>("Invalid Token");
+
+                ApplicationUser? user = await _userManager.FindByEmailAsync(email);
+
+                if (user is null)
+                    return ReturnBaseHandler.Failed<bool>("User Not Found");
+
+                string decodedToken = WebUtility.UrlDecode(resetPasswordToken);
+
+                IdentityResult resetPasswordResult = await _userManager.ResetPasswordAsync(user, decodedToken, newPassword);
+
+                if (resetPasswordResult.Succeeded)
+                    return ReturnBaseHandler.Success(true, "Password has been reset successfully");
+
+                return ReturnBaseHandler.Failed<bool>(resetPasswordResult.Errors.FirstOrDefault().Description);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
+            }
+        }
+        #endregion
+
+        #region Token Handle Functions
         private string GenerateJwtToken(string username, int userId, string jwtId)
         {
             List<Claim> claims = GetClaims(username, userId, jwtId);
@@ -384,74 +474,6 @@ namespace RecipeApp.Service.Implementation
             JwtSecurityToken jwtToken = tokenHandler.ReadJwtToken(token);
 
             return jwtToken.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value.ToString();
-        }
-
-        public async Task<ReturnBase<bool>> SendResetPasswordEmailAsync(string email)
-        {
-            try
-            {
-                if (email is null)
-                    return ReturnBaseHandler.Failed<bool>("Email is required");
-
-                ApplicationUser? user = await _userManager.FindByEmailAsync(email);
-
-                if (user is null)
-                    return ReturnBaseHandler.Failed<bool>("User Not Found");
-
-                string resetPasswordToken = await _userManager.GeneratePasswordResetTokenAsync(user);
-                string encodedToken = WebUtility.UrlEncode(resetPasswordToken);
-                HttpRequest requestAccessor = _httpContextAccessor.HttpContext.Request;
-
-                UriBuilder uriBuilder = new()
-                {
-                    Scheme = requestAccessor.Scheme,
-                    Host = requestAccessor.Host.Host,
-                    Port = requestAccessor.Host.Port ?? -1,
-                    Path = "api/authentication/ResetPassword",
-                    Query = $"email={Uri.EscapeDataString(email)}&token={encodedToken}"
-                };
-
-                string returnUrl = uriBuilder.ToString();
-
-                string message = $"To Reset Your Password Click This Link: <a href=\"{returnUrl}\">Reset Password</a>";
-
-                ReturnBase<string> sendEmailResult = await _emailService.SendEmailAsync(email, message, "Reset Password Link", "text/html");
-
-                if (sendEmailResult.Succeeded)
-                    return ReturnBaseHandler.Success(true, "Reset password email send successfully");
-
-                return ReturnBaseHandler.Failed<bool>(sendEmailResult.Message);
-            }
-            catch (Exception ex)
-            {
-                return ReturnBaseHandler.Failed<bool>(ex.Message);
-            }
-        }
-        public async Task<ReturnBase<bool>> ResetPasswordAsync(string resetPasswordToken, string newPassword, string email)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(resetPasswordToken))
-                    return ReturnBaseHandler.Failed<bool>("Invalid Token");
-
-                ApplicationUser? user = await _userManager.FindByEmailAsync(email);
-
-                if (user is null)
-                    return ReturnBaseHandler.Failed<bool>("User Not Found");
-
-                string decodedToken = WebUtility.UrlDecode(resetPasswordToken);
-
-                IdentityResult resetPasswordResult = await _userManager.ResetPasswordAsync(user, decodedToken, newPassword);
-
-                if (resetPasswordResult.Succeeded)
-                    return ReturnBaseHandler.Success(true, "Password has been reset successfully");
-
-                return ReturnBaseHandler.Failed<bool>(resetPasswordResult.Errors.FirstOrDefault().Description);
-            }
-            catch (Exception ex)
-            {
-                return ReturnBaseHandler.Failed<bool>(ex.Message);
-            }
         }
         #endregion
     }
