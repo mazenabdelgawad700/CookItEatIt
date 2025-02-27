@@ -35,6 +35,25 @@ namespace RecipeApp.Infrastructure.Repositories
                 return ReturnBaseHandler.Failed<IQueryable<Category>>(ex.Message);
             }
         }
+
+        public async Task<ReturnBase<Category>> GetCategoryById(int categoryId)
+        {
+            try
+            {
+                Category? category = await _dbSet.AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.Id == categoryId);
+
+                if (category is null)
+                    return ReturnBaseHandler.BadRequest<Category>("Category is not exist");
+
+                return ReturnBaseHandler.Success(category, "");
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<Category>(ex.Message);
+            }
+        }
+
         public async Task<ReturnBase<bool>> IsCategoryExistAsync(string categoryName)
         {
             try

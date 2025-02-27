@@ -63,5 +63,26 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<bool>(ex.Message);
             }
         }
+        public async Task<ReturnBase<bool>> UpdateCategoryAsync(Category category)
+        {
+            try
+            {
+                ReturnBase<Category> exsistingCategory = await _categoryRepository.GetCategoryById(category.Id);
+
+                if (!exsistingCategory.Succeeded || exsistingCategory.Data is null)
+                    return ReturnBaseHandler.Failed<bool>(exsistingCategory.Message);
+
+                ReturnBase<bool> updateCategoryResult = await _categoryRepository.UpdateAsync(category);
+
+                if (updateCategoryResult.Succeeded)
+                    return ReturnBaseHandler.Updated<bool>("Category updated successfully");
+
+                return ReturnBaseHandler.Failed<bool>(updateCategoryResult.Message);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
+            }
+        }
     }
 }

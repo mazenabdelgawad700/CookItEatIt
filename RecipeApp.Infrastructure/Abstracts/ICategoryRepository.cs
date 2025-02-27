@@ -8,5 +8,6 @@ namespace RecipeApp.Infrastructure.Abstracts
     {
         Task<ReturnBase<bool>> IsCategoryExistAsync(string categoryName);
         ReturnBase<IQueryable<Category>> GetAllCategories();
+        Task<ReturnBase<Category>> GetCategoryById(int categoryId);
     }
 }

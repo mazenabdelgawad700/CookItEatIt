@@ -20,6 +20,14 @@ namespace RecipeApp.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> UpdateCategoryAsync([FromBody] UpdateCategoryCommand command)
+        {
+            ReturnBase<bool> response = await Mediator.Send(command);
+            return NewResult(response);
+        }
+
+        [HttpPost]
         [Authorize]
         public async Task<IActionResult> GetAllCategoriesAsync([FromBody] GetAllCategoriesQuery query)
         {
