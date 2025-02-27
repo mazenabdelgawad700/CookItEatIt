@@ -3,16 +3,18 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using RecipeApp.Core;
 using RecipeApp.Core.MiddelWare;
+using RecipeApp.Domain.Entities.Identity;
 using RecipeApp.Infrastructure;
 using RecipeApp.Infrastructure.Context;
 using RecipeApp.Infrastructure.Middlewares;
+using RecipeApp.Infrastructure.Seeder;
 using RecipeApp.Service;
 
 namespace RecipeApp.API;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -56,8 +58,19 @@ public class Program
 
         builder.Services.AddCustomRateLimiting();
 
+        builder.Services.AddAuthorizationBuilder()
+            .AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"))
+            .AddPolicy("UserOnly", policy => policy.RequireRole("User"));
 
         var app = builder.Build();
+
+        using (IServiceScope scope = app.Services.CreateScope())
+        {
+            RoleManager<Role> roleManager =
+                scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
+
+            await RoleSeeder.SeedRolesAsync(roleManager);
+        }
 
         if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
         {

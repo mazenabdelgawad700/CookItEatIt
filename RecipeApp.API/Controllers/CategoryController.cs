@@ -12,7 +12,7 @@ namespace RecipeApp.API.Controllers
     public class CategoryController : AppControllerBase
     {
         [HttpPost]
-        //[Authorize]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> AddCategoryAsync([FromBody] AddCategoryCommand command)
         {
             ReturnBase<bool> response = await Mediator.Send(command);

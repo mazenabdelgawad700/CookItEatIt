@@ -127,7 +127,7 @@ namespace RecipeApp.Service.Implementation
 
 
                 string jwtId = Guid.NewGuid().ToString();
-                string token = GenerateJwtToken(user.UserName!, user.Id, jwtId);
+                string token = await GenerateJwtToken(user, jwtId);
 
 
                 ApplicationUserRefreshToken newRefreshToken = new()
@@ -169,6 +169,14 @@ namespace RecipeApp.Service.Implementation
                     }
                 }
 
+                var checkIfUserHasUserRole = await _userManager.IsInRoleAsync(user, "User");
+                var checkIfUserHasAdminRole = await _userManager.IsInRoleAsync(user, "Admin");
+
+                if (!checkIfUserHasUserRole && !checkIfUserHasAdminRole)
+                {
+                    await _userManager.AddToRoleAsync(user, "User");
+                }
+
                 await _dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
                 await transaction.DisposeAsync();
@@ -189,6 +197,9 @@ namespace RecipeApp.Service.Implementation
                 if (createUserResult.Succeeded)
                 {
                     ReturnBase<bool> sendConfirmationEmailResult = await _confirmEmailService.SendConfirmationEmailAsync(appUser);
+
+                    await _userManager.AddToRoleAsync(appUser, "User");
+
                     if (sendConfirmationEmailResult.Data)
                     {
                         return ReturnBaseHandler.Created("", $"Confirmation Email has been sent to {appUser.Email} Please, confirm your email");
@@ -355,9 +366,9 @@ namespace RecipeApp.Service.Implementation
         #endregion
 
         #region Token Handle Functions
-        private string GenerateJwtToken(string username, int userId, string jwtId)
+        private async Task<string> GenerateJwtToken(ApplicationUser user, string jwtId)
         {
-            List<Claim> claims = GetClaims(username, userId, jwtId);
+            List<Claim> claims = await GetClaimsAsync(user, jwtId);
 
             SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
             SigningCredentials creds = new(key, SecurityAlgorithms.HmacSha256);
@@ -372,13 +383,21 @@ namespace RecipeApp.Service.Implementation
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-        private List<Claim> GetClaims(string username, int userId, string jwtId)
+        private async Task<List<Claim>> GetClaimsAsync(ApplicationUser user, string jwtId)
         {
-            return [
-                new Claim(JwtRegisteredClaimNames.Name, username),
-                new Claim("UserId", userId.ToString()),
-                new Claim(JwtRegisteredClaimNames.Jti, jwtId)
+            var roles = await _userManager.GetRolesAsync(user);
+            List<Claim> claims =
+            [
+                new Claim("UserId", user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Jti, jwtId),
             ];
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+            var userClaims = await _userManager.GetClaimsAsync(user);
+            claims.AddRange(userClaims);
+            return claims;
         }
         private bool IsAccessTokenExpired(string accessToken)
         {
@@ -438,7 +457,7 @@ namespace RecipeApp.Service.Implementation
 
 
                 string newJwtId = Guid.NewGuid().ToString();
-                string newAccessToken = GenerateJwtToken(user.UserName!, user.Id, newJwtId);
+                string newAccessToken = await GenerateJwtToken(user, newJwtId);
 
                 storedRefreshToken.JwtId = newJwtId;
 
