@@ -9,6 +9,6 @@ namespace RecipeApp.Core.Features.ApplicationUserFeature.Command.Model
         public string? UserName { get; set; }
         public string? Bio { get; set; }
         public string? Email { get; set; }
-        public string? Country { get; set; }
+        public int? CountryId { get; set; }
     }
 }

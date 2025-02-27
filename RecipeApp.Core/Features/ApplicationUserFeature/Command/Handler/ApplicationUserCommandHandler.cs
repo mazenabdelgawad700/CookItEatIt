@@ -46,13 +46,16 @@ namespace RecipeApp.Core.Features.ApplicationUserFeature.Command.Handler
 
                 bool isUserNameUpdated = !string.IsNullOrWhiteSpace(request.UserName) && !request.UserName.Equals(currentUserName, StringComparison.OrdinalIgnoreCase);
 
+                bool isCountryUpdated = request.CountryId is not null &&
+                    request.CountryId != getUserResult.Data.CountryId;
+
                 if (isUserNameUpdated)
                 {
                     ReturnBase<bool> exsitingUserNameResult = await _authenticationService.IsEmailAlreadyRegisteredAsync(request.UserName);
 
                     if (exsitingUserNameResult.Succeeded)
                     {
-                        return ReturnBaseHandler.Failed<bool>("User Name already used");
+                        return ReturnBaseHandler.BadRequest<bool>("User Name already used");
                     }
                 }
 
@@ -62,7 +65,16 @@ namespace RecipeApp.Core.Features.ApplicationUserFeature.Command.Handler
 
                     if (exsitingEmailResult.Succeeded)
                     {
-                        return ReturnBaseHandler.Failed<bool>("Email already used");
+                        return ReturnBaseHandler.BadRequest<bool>("Email already used");
+                    }
+                }
+
+                if (isCountryUpdated)
+                {
+                    ReturnBase<bool> countryResult = await _applicationUserService.IsCountryValidAsync(request.CountryId);
+                    if (!countryResult.Succeeded)
+                    {
+                        return ReturnBaseHandler.BadRequest<bool>(countryResult.Message);
                     }
                 }
 

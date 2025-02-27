@@ -8,7 +8,8 @@ namespace RecipeApp.Core.Mapping.ApplicationUserMapping
     {
         public GetApplicationUserByIdMapping()
         {
-            CreateMap<ApplicationUser, GetApplicationUserProfileByIdResponse>();
+            CreateMap<ApplicationUser, GetApplicationUserProfileByIdResponse>()
+                .ForMember(dest => dest.Country, opt => opt.MapFrom(src => src.Country!.Name));
         }
     }
 }
