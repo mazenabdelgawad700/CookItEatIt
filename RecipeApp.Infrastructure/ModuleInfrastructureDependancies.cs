@@ -11,6 +11,7 @@ public static class ModuleInfrastructureDependencies
         (this IServiceCollection services)
     {
         services.AddTransient<IApplicationUserRepository, ApplicationUserRepository>();
+        services.AddTransient<ICategoryRepository, CategoryRepository>();
 
         services.AddTransient(typeof(IGenericRepositoryAsync<>), typeof(GenericRepositoryAsync<>));
 
