@@ -15,6 +15,21 @@ namespace RecipeApp.Infrastructure.Repositories
             _dbSet = dbContext.Set<PreferredDish>();
         }
 
+        public async Task<ReturnBase<PreferredDish>> GetPreferredDishByIdAsNoTracking(int preferredDishId)
+        {
+            try
+            {
+                PreferredDish? exsitingDish = await _dbSet.AsNoTracking().FirstOrDefaultAsync(x => x.Id == preferredDishId);
+                if (exsitingDish is null)
+                    return ReturnBaseHandler.BadRequest<PreferredDish>("Dish is not exist");
+
+                return ReturnBaseHandler.Success(exsitingDish, "");
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<PreferredDish>(ex.Message);
+            }
+        }
         public async Task<ReturnBase<bool>> IsPreferredDishExistAsync(string dishName)
         {
             try

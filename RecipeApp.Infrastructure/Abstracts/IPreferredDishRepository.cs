@@ -8,6 +8,6 @@ namespace RecipeApp.Infrastructure.Abstracts
     {
         Task<ReturnBase<bool>> IsPreferredDishExistAsync(string dishName);
         //ReturnBase<IQueryable<PreferredDish>> GetAllPreferredDishs();
-        //Task<ReturnBase<PreferredDish>> GetPreferredDishById(int preferredDishId);
+        Task<ReturnBase<PreferredDish>> GetPreferredDishByIdAsNoTracking(int preferredDishId);
     }
 }

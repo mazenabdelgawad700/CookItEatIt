@@ -11,7 +11,15 @@ namespace RecipeApp.API.Controllers
     {
         [HttpPost]
         [Authorize(Policy = "AdminOnly")]
-        public async Task<IActionResult> AddPreferredDishAsync([FromForm] AddPreferredDishCommand command)
+        public async Task<IActionResult> CreateAsync([FromForm] AddPreferredDishCommand command)
+        {
+            ReturnBase<bool> response = await Mediator.Send(command);
+            return NewResult(response);
+        }
+
+        [HttpPost]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> UpdateAsync([FromForm] UpdatePreferredDishCommand command)
         {
             ReturnBase<bool> response = await Mediator.Send(command);
             return NewResult(response);

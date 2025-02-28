@@ -4,11 +4,11 @@ using RecipeApp.Domain.Entities.Models;
 
 namespace RecipeApp.Core.Mapping.PreferredDishMapping
 {
-    public class PreferredDishMapping : Profile
+    public class UpdatePreferredDishMapping : Profile
     {
-        public PreferredDishMapping()
+        public UpdatePreferredDishMapping()
         {
-            CreateMap<PreferredDish, AddPreferredDishCommand>().ReverseMap();
+            CreateMap<PreferredDish, UpdatePreferredDishCommand>().ReverseMap();
         }
     }
 }

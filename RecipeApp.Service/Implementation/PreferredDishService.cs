@@ -48,5 +48,22 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<bool>(ex.Message);
             }
         }
+        public async Task<ReturnBase<bool>> UpdatePreferredDishAsync(PreferredDish preferredDish)
+        {
+            try
+            {
+                ReturnBase<bool> updatePeferredDishResult = await
+                    _preferredDishRepository.UpdateAsync(preferredDish);
+
+                if (updatePeferredDishResult.Succeeded)
+                    return ReturnBaseHandler.Updated<bool>(updatePeferredDishResult.Message);
+
+                return ReturnBaseHandler.BadRequest<bool>(updatePeferredDishResult.Message);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
+            }
+        }
     }
 }

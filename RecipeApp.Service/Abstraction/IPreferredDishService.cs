@@ -7,5 +7,6 @@ namespace RecipeApp.Service.Abstraction
     {
         Task<ReturnBase<bool>> IsPreferredDishExistAsync(string dishName);
         Task<ReturnBase<bool>> AddPreferredDishAsync(PreferredDish preferredDish);
+        Task<ReturnBase<bool>> UpdatePreferredDishAsync(PreferredDish preferredDish);
     }
 }
