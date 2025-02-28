@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RecipeApp.Infrastructure.Context;
 
@@ -11,9 +12,11 @@ using RecipeApp.Infrastructure.Context;
 namespace RecipeApp.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250228112422_UpdateDishNameAttribute")]
+    partial class UpdateDishNameAttribute
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -514,6 +517,9 @@ namespace RecipeApp.Infrastructure.Migrations
                     b.Property<int>("CookTimeMinutes")
                         .HasColumnType("int");
 
+                    b.Property<int>("CountryId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -531,9 +537,6 @@ namespace RecipeApp.Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<int>("LikesCount")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PreferredDishId")
                         .HasColumnType("int");
 
                     b.Property<string>("RecipeName")
@@ -558,7 +561,7 @@ namespace RecipeApp.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PreferredDishId");
+                    b.HasIndex("CountryId");
 
                     b.HasIndex("UserId");
 
@@ -819,10 +822,10 @@ namespace RecipeApp.Infrastructure.Migrations
 
             modelBuilder.Entity("RecipeApp.Domain.Entities.Models.Recipe", b =>
                 {
-                    b.HasOne("RecipeApp.Domain.Entities.Models.PreferredDish", "PreferredDish")
+                    b.HasOne("RecipeApp.Domain.Entities.Models.Country", "Country")
                         .WithMany("Recipes")
-                        .HasForeignKey("PreferredDishId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("RecipeApp.Domain.Entities.Identity.ApplicationUser", "User")
@@ -835,7 +838,7 @@ namespace RecipeApp.Infrastructure.Migrations
                         .WithMany("Recipes")
                         .HasForeignKey("SavedRecipeUserId", "SavedRecipeRecipeId");
 
-                    b.Navigation("PreferredDish");
+                    b.Navigation("Country");
 
                     b.Navigation("User");
                 });
@@ -964,12 +967,9 @@ namespace RecipeApp.Infrastructure.Migrations
 
             modelBuilder.Entity("RecipeApp.Domain.Entities.Models.Country", b =>
                 {
-                    b.Navigation("Users");
-                });
-
-            modelBuilder.Entity("RecipeApp.Domain.Entities.Models.PreferredDish", b =>
-                {
                     b.Navigation("Recipes");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("RecipeApp.Domain.Entities.Models.Recipe", b =>

@@ -15,12 +15,6 @@ namespace RecipeApp.Infrastructure.Configurations
                    .WithOne(x => x.Country)
                    .HasForeignKey(x => x.CountryId)
                    .OnDelete(DeleteBehavior.Cascade);
-
-            // Relationship many recipes (belong to)-> one country 
-            builder.HasMany(x => x.Recipes)
-                   .WithOne(x => x.Country)
-                   .HasForeignKey(x => x.CountryId)
-                   .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

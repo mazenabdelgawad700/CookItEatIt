@@ -14,6 +14,7 @@ public static class ModuleServiceDependencies
         services.AddTransient<IAuthenticationService, AuthenticationService>();
         services.AddTransient<IFileService, FileService>();
         services.AddTransient<IApplicationUserService, ApplicationUserService>();
+        services.AddTransient<IPreferredDishService, PreferredDishService>();
         services.AddTransient<ICategoryService, CategoryService>();
         services.AddTransient<ISendPasswordChangeNotificationEmailService, SendPasswordChangeNotificationEmailService>();
         return services;

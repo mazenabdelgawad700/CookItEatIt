@@ -25,6 +25,9 @@
   <ItemGroup>
     <Folder Include="Features\ApplicationUserFeature\Command\Validator\" />
     <Folder Include="Features\Authentication\Query\" />
+    <Folder Include="Features\PreferredDishFeature\Queries\Handler\" />
+    <Folder Include="Features\PreferredDishFeature\Queries\Model\" />
+    <Folder Include="Features\PreferredDishFeature\Queries\Response\" />
   </ItemGroup>
 
 </Project>

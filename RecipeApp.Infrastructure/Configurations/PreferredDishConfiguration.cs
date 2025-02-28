@@ -14,6 +14,8 @@ namespace RecipeApp.Infrastructure.Configurations
                    .IsRequired()
                    .HasMaxLength(200);
 
+            builder.HasIndex(pd => pd.DishName).IsUnique();
+
             builder.Property(pd => pd.ImageUrl)
                    .IsRequired()
                    .HasMaxLength(1000);
@@ -24,11 +26,11 @@ namespace RecipeApp.Infrastructure.Configurations
                    .HasForeignKey(pd => pd.UserPreferencesId)
                    .OnDelete(DeleteBehavior.Cascade);
 
-            // Many-to-One relationship with Country
-            builder.HasOne(pd => pd.Country)
-                   .WithMany()
-                   .HasForeignKey(pd => pd.CountryId)
-                   .OnDelete(DeleteBehavior.Restrict);  // Prevent deletion of country if referenced by preferred dishes
+            // One-to-Many relationship with Recipes
+            builder.HasMany(x => x.Recipes)
+                   .WithOne(x => x.PreferredDish)
+                   .HasForeignKey(x => x.PreferredDishId)
+                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
