@@ -8,98 +8,132 @@ using RecipeApp.Shared.Bases;
 
 namespace RecipeApp.Core.Features.PreferredDishFeature.Command.Handler
 {
-    internal class PreferredDishHandler : IRequestHandler<AddPreferredDishCommand, ReturnBase<bool>>
-        , IRequestHandler<UpdatePreferredDishCommand, ReturnBase<bool>>
+  internal class PreferredDishHandler : IRequestHandler<AddPreferredDishCommand, ReturnBase<bool>>
+      , IRequestHandler<UpdatePreferredDishCommand, ReturnBase<bool>>
+      , IRequestHandler<DeletePreferredDishCommand, ReturnBase<bool>>
+  {
+    private readonly IPreferredDishService _preferredDishService;
+    private readonly IPreferredDishRepository _preferredDishRepository;
+    private readonly IFileService _fileService;
+    private readonly IMapper _mapper;
+    internal static readonly string[] allowedFileExtensions = [".jpg", ".jpeg", ".png"];
+
+    public PreferredDishHandler(IPreferredDishService preferredDishService, IMapper mapper, IFileService fileService, IPreferredDishRepository preferredDishRepository)
     {
-        private readonly IPreferredDishService _preferredDishService;
-        private readonly IPreferredDishRepository _preferredDishRepository;
-        private readonly IFileService _fileService;
-        private readonly IMapper _mapper;
-        internal static readonly string[] allowedFileExtensions = [".jpg", ".jpeg", ".png"];
-
-        public PreferredDishHandler(IPreferredDishService preferredDishService, IMapper mapper, IFileService fileService, IPreferredDishRepository preferredDishRepository)
-        {
-            _preferredDishService = preferredDishService;
-            _mapper = mapper;
-            _fileService = fileService;
-            _preferredDishRepository = preferredDishRepository;
-        }
-
-        public async Task<ReturnBase<bool>> Handle(AddPreferredDishCommand request, CancellationToken cancellationToken)
-        {
-            try
-            {
-                ReturnBase<string> addImage = await _fileService.SaveFileAsync(request.DishImage, allowedFileExtensions);
-
-                if (!addImage.Succeeded)
-                    return ReturnBaseHandler.Failed<bool>(addImage.Message);
-
-                PreferredDish mappedResult = _mapper.Map<PreferredDish>(request);
-
-                mappedResult.ImageUrl = addImage.Data;
-
-                var addPreferredDishResult = await _preferredDishService.AddPreferredDishAsync(mappedResult);
-
-                if (addPreferredDishResult.Succeeded)
-                    return ReturnBaseHandler.Created(true, "Preferred Dish Added Successfully");
-
-                return ReturnBaseHandler.Failed<bool>(addPreferredDishResult.Message);
-            }
-            catch (Exception ex)
-            {
-                return ReturnBaseHandler.Failed<bool>(ex.Message);
-            }
-        }
-        public async Task<ReturnBase<bool>> Handle(UpdatePreferredDishCommand request, CancellationToken cancellationToken)
-        {
-            try
-            {
-                ReturnBase<PreferredDish> getPreferredDishResult = await _preferredDishRepository.GetPreferredDishByIdAsNoTracking(request.Id);
-
-                if (getPreferredDishResult.Data.Recipes is not null && getPreferredDishResult.Data.Recipes.Count > 0)
-                    return ReturnBaseHandler.BadRequest<bool>("Preferred Dish is in use, can't update");
-
-                if (!getPreferredDishResult.Succeeded)
-                    return ReturnBaseHandler.BadRequest<bool>(getPreferredDishResult.Message);
-
-                PreferredDish mappedResult = _mapper.Map<PreferredDish>(request);
-
-                if (request.DishName is null || request.DishName.Equals("null", StringComparison.CurrentCultureIgnoreCase))
-                    mappedResult.DishName = getPreferredDishResult.Data.DishName;
-
-                if (request.DishImage is null)
-                {
-                    mappedResult.ImageUrl = getPreferredDishResult.Data.ImageUrl;
-                }
-                else
-                {
-                    // Delete old image
-                    int startIndex = getPreferredDishResult.Data.ImageUrl.LastIndexOf('\\');
-                    string pictureName = getPreferredDishResult.Data.ImageUrl.Substring(startIndex + 1);
-                    var deleteOldImageResult = _fileService.DeleteFile(pictureName);
-                    if (!deleteOldImageResult.Succeeded)
-                        return ReturnBaseHandler.Failed<bool>(deleteOldImageResult.Message);
-
-                    // Add new image
-                    ReturnBase<string> addImageResult = await _fileService.SaveFileAsync(request.DishImage, allowedFileExtensions);
-
-                    if (!addImageResult.Succeeded)
-                        return ReturnBaseHandler.Failed<bool>(deleteOldImageResult.Message);
-
-                    mappedResult.ImageUrl = addImageResult.Data;
-                }
-
-                var updatePreferredDishResult = await _preferredDishService.UpdatePreferredDishAsync(mappedResult);
-
-                if (updatePreferredDishResult.Succeeded)
-                    return ReturnBaseHandler.Updated<bool>("Preferred Dish Updated Successfully");
-
-                return ReturnBaseHandler.Failed<bool>(updatePreferredDishResult.Message);
-            }
-            catch (Exception ex)
-            {
-                return ReturnBaseHandler.Failed<bool>(ex.Message);
-            }
-        }
+      _preferredDishService = preferredDishService;
+      _mapper = mapper;
+      _fileService = fileService;
+      _preferredDishRepository = preferredDishRepository;
     }
+
+    public async Task<ReturnBase<bool>> Handle(AddPreferredDishCommand request, CancellationToken cancellationToken)
+    {
+      try
+      {
+        ReturnBase<string> addImage = await _fileService.SaveFileAsync(request.DishImage, allowedFileExtensions);
+
+        if (!addImage.Succeeded)
+          return ReturnBaseHandler.Failed<bool>(addImage.Message);
+
+        PreferredDish mappedResult = _mapper.Map<PreferredDish>(request);
+
+        mappedResult.ImageUrl = addImage.Data;
+
+        var addPreferredDishResult = await _preferredDishService.AddPreferredDishAsync(mappedResult);
+
+        if (addPreferredDishResult.Succeeded)
+          return ReturnBaseHandler.Created(true, "Preferred Dish Added Successfully");
+
+        return ReturnBaseHandler.Failed<bool>(addPreferredDishResult.Message);
+      }
+      catch (Exception ex)
+      {
+        return ReturnBaseHandler.Failed<bool>(ex.Message);
+      }
+    }
+    public async Task<ReturnBase<bool>> Handle(UpdatePreferredDishCommand request, CancellationToken cancellationToken)
+    {
+      try
+      {
+        ReturnBase<PreferredDish> getPreferredDishResult = await _preferredDishRepository.GetPreferredDishByIdAsNoTracking(request.Id);
+
+        if (getPreferredDishResult.Data.Recipes is not null && getPreferredDishResult.Data.Recipes.Count > 0)
+          return ReturnBaseHandler.BadRequest<bool>("Preferred Dish is in use, can't update");
+
+        if (!getPreferredDishResult.Succeeded)
+          return ReturnBaseHandler.BadRequest<bool>(getPreferredDishResult.Message);
+
+        PreferredDish mappedResult = _mapper.Map<PreferredDish>(request);
+
+        if (request.DishName is null || request.DishName.Equals("null", StringComparison.CurrentCultureIgnoreCase))
+          mappedResult.DishName = getPreferredDishResult.Data.DishName;
+
+        if (request.DishImage is null)
+        {
+          mappedResult.ImageUrl = getPreferredDishResult.Data.ImageUrl;
+        }
+        else
+        {
+          // Delete old image
+          int startIndex = getPreferredDishResult.Data.ImageUrl.LastIndexOf('\\');
+          string pictureName = getPreferredDishResult.Data.ImageUrl.Substring(startIndex + 1);
+          var deleteOldImageResult = _fileService.DeleteFile(pictureName);
+          if (!deleteOldImageResult.Succeeded)
+            return ReturnBaseHandler.Failed<bool>(deleteOldImageResult.Message);
+
+          // Add new image
+          ReturnBase<string> addImageResult = await _fileService.SaveFileAsync(request.DishImage, allowedFileExtensions);
+
+          if (!addImageResult.Succeeded)
+            return ReturnBaseHandler.Failed<bool>(deleteOldImageResult.Message);
+
+          mappedResult.ImageUrl = addImageResult.Data;
+        }
+
+        var updatePreferredDishResult = await _preferredDishService.UpdatePreferredDishAsync(mappedResult);
+
+        if (updatePreferredDishResult.Succeeded)
+          return ReturnBaseHandler.Updated<bool>("Preferred Dish Updated Successfully");
+
+        return ReturnBaseHandler.Failed<bool>(updatePreferredDishResult.Message);
+      }
+      catch (Exception ex)
+      {
+        return ReturnBaseHandler.Failed<bool>(ex.Message);
+      }
+    }
+
+    public async Task<ReturnBase<bool>> Handle(DeletePreferredDishCommand request, CancellationToken cancellationToken)
+    {
+      try
+      {
+        ReturnBase<PreferredDish> getPreferredDishResult =
+            await _preferredDishRepository.GetPreferredDishByIdAsNoTracking(request.Id);
+
+        if (!getPreferredDishResult.Succeeded)
+          return ReturnBaseHandler.NotFound<bool>("Preferred Dish not found");
+
+        if (getPreferredDishResult.Data.Recipes is not null && getPreferredDishResult.Data.Recipes.Count > 0)
+          return ReturnBaseHandler.BadRequest<bool>("Cannot delete preferred dish as it is being used by recipes");
+
+        int startIndex = getPreferredDishResult.Data.ImageUrl.LastIndexOf('\\');
+        string pictureName = getPreferredDishResult.Data.ImageUrl.Substring(startIndex + 1);
+        ReturnBase<bool> deleteImageResult = _fileService.DeleteFile(pictureName);
+
+        if (!deleteImageResult.Succeeded)
+          return ReturnBaseHandler.Failed<bool>(deleteImageResult.Message);
+
+        ReturnBase<bool> deleteResult = await _preferredDishService.DeletePreferredDishAsync(request.Id);
+
+        if (deleteResult.Succeeded)
+          return ReturnBaseHandler.Success(true, "Preferred Dish deleted successfully");
+
+        return ReturnBaseHandler.Failed<bool>(deleteResult.Message);
+      }
+      catch (Exception ex)
+      {
+        return ReturnBaseHandler.Failed<bool>(ex.Message);
+      }
+    }
+  }
 }
