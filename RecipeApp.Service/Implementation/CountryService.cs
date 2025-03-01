@@ -25,5 +25,21 @@ namespace RecipeApp.Service.Implementation
         return ReturnBaseHandler.Failed<IQueryable<Country>>(ex.Message);
       }
     }
+
+    public async Task<ReturnBase<bool>> IsCountryExistsAsync(int countryId)
+    {
+      try
+      {
+        var country = await _countryRepository.GetByIdAsync(countryId);
+        if (!country.Succeeded || country.Data is null)
+          return ReturnBaseHandler.NotFound<bool>("Country not found");
+
+        return ReturnBaseHandler.Success(true, "Country exists");
+      }
+      catch (Exception ex)
+      {
+        return ReturnBaseHandler.Failed<bool>(ex.Message);
+      }
+    }
   }
 }

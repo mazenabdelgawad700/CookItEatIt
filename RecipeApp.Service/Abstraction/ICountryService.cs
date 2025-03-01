@@ -6,5 +6,6 @@ namespace RecipeApp.Service.Abstraction
   public interface ICountryService
   {
     Task<ReturnBase<IQueryable<Country>>> GetAllCountriesAsync(string? searchTerm);
+    Task<ReturnBase<bool>> IsCountryExistsAsync(int countryId);
   }
 }
