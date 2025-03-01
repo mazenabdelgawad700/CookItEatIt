@@ -7,15 +7,16 @@ namespace RecipeApp.Infrastructure;
 
 public static class ModuleInfrastructureDependencies
 {
-    public static IServiceCollection AddInfrastructureDependencies
-        (this IServiceCollection services)
-    {
-        services.AddTransient<IApplicationUserRepository, ApplicationUserRepository>();
-        services.AddTransient<ICategoryRepository, CategoryRepository>();
-        services.AddTransient<IPreferredDishRepository, PreferredDishRepository>();
+  public static IServiceCollection AddInfrastructureDependencies
+      (this IServiceCollection services)
+  {
+    services.AddTransient<IApplicationUserRepository, ApplicationUserRepository>();
+    services.AddTransient<ICategoryRepository, CategoryRepository>();
+    services.AddTransient<IPreferredDishRepository, PreferredDishRepository>();
+    services.AddTransient<ICountryRepository, CountryRepository>();
 
-        services.AddTransient(typeof(IGenericRepositoryAsync<>), typeof(GenericRepositoryAsync<>));
+    services.AddTransient(typeof(IGenericRepositoryAsync<>), typeof(GenericRepositoryAsync<>));
 
-        return services;
-    }
+    return services;
+  }
 }
