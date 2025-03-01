@@ -8,7 +8,18 @@ namespace RecipeApp.Infrastructure.Configurations
     {
         public void Configure(EntityTypeBuilder<UserPreferredCategory> builder)
         {
-            builder.HasKey(e => new { e.UserPreferencesId, e.CategoryId });
+            builder.HasKey(e => new { e.UserId, e.CategoryId });
+
+            // Relationships
+            builder.HasOne(upc => upc.ApplicationUser)
+                   .WithMany(au => au.UserPreferredCategories)
+                   .HasForeignKey(upc => upc.UserId)
+                   .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(upc => upc.Category)
+                   .WithMany(au => au.UserPreferredCategories)
+                   .HasForeignKey(upc => upc.CategoryId)
+                   .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

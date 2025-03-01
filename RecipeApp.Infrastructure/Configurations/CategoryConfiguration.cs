@@ -25,6 +25,12 @@ namespace RecipeApp.Infrastructure.Configurations
                              .WithMany()
                              .HasForeignKey(rc => rc.CategoryId)
                    );
+
+            // Many-to-many with ApplicationUser via UserPreferredCategory
+            builder.HasMany(c => c.UserPreferredCategories)
+                   .WithOne(upc => upc.Category)
+                   .HasForeignKey(upc => upc.CategoryId)
+                   .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

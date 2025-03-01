@@ -20,11 +20,10 @@ namespace RecipeApp.Infrastructure.Configurations
                    .IsRequired()
                    .HasMaxLength(1000);
 
-            // Many-to-One relationship with UserPreferences
-            builder.HasOne(pd => pd.UserPreferences)
-                   .WithMany(up => up.PreferredDishes)
-                   .HasForeignKey(pd => pd.UserPreferencesId)
-                   .OnDelete(DeleteBehavior.Cascade);
+            builder.HasMany(pd => pd.UserPreferredDishes)
+                .WithOne(upd => upd.PreferredDish)
+                .HasForeignKey(upd => upd.PreferredDishId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // One-to-Many relationship with Recipes
             builder.HasMany(x => x.Recipes)

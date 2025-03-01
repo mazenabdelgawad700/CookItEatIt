@@ -26,5 +26,7 @@ namespace RecipeApp.Domain.Entities.Identity
         public virtual ICollection<ChefRecipeRequest> RecipeRequests { get; set; }
         public virtual ICollection<ChefRecipeRequest> ReceivedRequests { get; set; }
         public virtual ICollection<ApplicationUserRefreshToken> ApplicationUserRefreshTokens { get; set; }
+        public virtual ICollection<UserPreferredDishes> UserPreferredDishes { get; set; }
+        public virtual ICollection<UserPreferredCategory> UserPreferredCategories { get; set; }
     }
 }

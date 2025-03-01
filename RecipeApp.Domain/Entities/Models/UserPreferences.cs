@@ -10,7 +10,5 @@ namespace RecipeApp.Domain.Entities.Models
         public bool AcceptNewDishNotification { get; set; }
         public int DefaultHungryHeads { get; set; }
         public ApplicationUser User { get; set; }
-        public ICollection<PreferredDish> PreferredDishes { get; set; }
-        public ICollection<Category> PreferredCategories { get; set; }
     }
 }

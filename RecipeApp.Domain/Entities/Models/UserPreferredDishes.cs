@@ -2,11 +2,11 @@
 
 namespace RecipeApp.Domain.Entities.Models
 {
-    public class UserPreferredCategory
+    public class UserPreferredDishes
     {
         public int UserId { get; set; }
-        public int CategoryId { get; set; }
-        public virtual Category Category { get; set; }
+        public int PreferredDishId { get; set; }
+        public virtual PreferredDish PreferredDish { get; set; }
         public virtual ApplicationUser ApplicationUser { get; set; }
     }
 }

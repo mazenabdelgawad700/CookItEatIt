@@ -23,22 +23,22 @@ namespace RecipeApp.Infrastructure.Configurations
                    .HasDefaultValue(4);
 
             // Many-to-Many relationship with Category
-            builder.HasMany(p => p.PreferredCategories)
-                   .WithMany()
-                   .UsingEntity<UserPreferredCategory>(
-                       j => j
-                           .HasOne(upc => upc.Category)
-                           .WithMany()
-                           .HasForeignKey(upc => upc.CategoryId),
-                       j => j
-                           .HasOne(upc => upc.UserPreferences)
-                           .WithMany()
-                           .HasForeignKey(upc => upc.UserPreferencesId),
-                       j =>
-                       {
-                           j.HasKey(t => new { t.UserPreferencesId, t.CategoryId });
-                           j.ToTable("UserPreferredCategories");
-                       });
+            //builder.HasMany(p => p.PreferredCategories)
+            //       .WithMany()
+            //       .UsingEntity<UserPreferredCategory>(
+            //           j => j
+            //               .HasOne(upc => upc.Category)
+            //               .WithMany()
+            //               .HasForeignKey(upc => upc.CategoryId),
+            //           j => j
+            //               .HasOne(upc => upc.UserPreferences)
+            //               .WithMany()
+            //               .HasForeignKey(upc => upc.UserPreferencesId),
+            //           j =>
+            //           {
+            //               j.HasKey(t => new { t.UserPreferencesId, t.CategoryId });
+            //               j.ToTable("UserPreferredCategories");
+            //           });
         }
     }
 
