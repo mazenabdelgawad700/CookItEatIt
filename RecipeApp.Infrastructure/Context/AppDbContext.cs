@@ -26,6 +26,7 @@ namespace RecipeApp.Infrastructure.Context
         public DbSet<ApplicationUserRefreshToken> UserRefreshToken { get; set; }
         public DbSet<PreferredDish> PreferredDish { get; set; }
         public DbSet<UserPreferredDishes> UserPreferredDishes { get; set; }
+        public DbSet<UserPreferredCategory> UserPreferredCategory { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
