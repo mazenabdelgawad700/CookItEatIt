@@ -18,6 +18,7 @@ public static class ModuleServiceDependencies
     services.AddTransient<ICategoryService, CategoryService>();
     services.AddTransient<ISendPasswordChangeNotificationEmailService, SendPasswordChangeNotificationEmailService>();
     services.AddTransient<ICountryService, CountryService>();
+    services.AddTransient<IUserPreferredDishesService, UserPreferredDishesService>();
     return services;
   }
 }

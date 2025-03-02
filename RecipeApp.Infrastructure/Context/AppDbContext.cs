@@ -24,6 +24,8 @@ namespace RecipeApp.Infrastructure.Context
         public DbSet<ChefRecipeRequest> ChefRecipeRequest { get; set; }
         public DbSet<LoginAttempt> LoginAttempt { get; set; }
         public DbSet<ApplicationUserRefreshToken> UserRefreshToken { get; set; }
+        public DbSet<PreferredDish> PreferredDish { get; set; }
+        public DbSet<UserPreferredDishes> UserPreferredDishes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
