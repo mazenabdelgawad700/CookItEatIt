@@ -28,6 +28,12 @@
     <Folder Include="Features\PreferredDishFeature\Queries\Handler\" />
     <Folder Include="Features\PreferredDishFeature\Queries\Model\" />
     <Folder Include="Features\PreferredDishFeature\Queries\Response\" />
+    <Folder Include="Features\UserPreferencesFeature\Command\Handler\" />
+    <Folder Include="Features\UserPreferencesFeature\Command\Model\" />
+    <Folder Include="Features\UserPreferencesFeature\Command\Validator\" />
+    <Folder Include="Features\UserPreferencesFeature\Queries\Handler\" />
+    <Folder Include="Features\UserPreferencesFeature\Queries\Model\" />
+    <Folder Include="Features\UserPreferencesFeature\Queries\Response\" />
   </ItemGroup>
 
 </Project>

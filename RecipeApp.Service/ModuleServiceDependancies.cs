@@ -20,6 +20,7 @@ public static class ModuleServiceDependencies
     services.AddTransient<ICountryService, CountryService>();
     services.AddTransient<IUserPreferredDishesService, UserPreferredDishesService>();
     services.AddTransient<IUserPreferredCategoriesService, UserPreferredCategoriesService>();
+    services.AddTransient<IUserPreferencesService, UserPreferencesService>();
     return services;
   }
 }

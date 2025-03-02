@@ -7,31 +7,32 @@ using System.Reflection;
 
 namespace RecipeApp.Infrastructure.Context
 {
-    public class AppDbContext : IdentityDbContext<ApplicationUser, Role, int, IdentityUserClaim<int>, IdentityUserRole<int>, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>>
+  public class AppDbContext : IdentityDbContext<ApplicationUser, Role, int, IdentityUserClaim<int>, IdentityUserRole<int>, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>>
+  {
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+
+    public DbSet<ApplicationUser> ApplicationUser { get; set; }
+    public DbSet<Recipe> Recipe { get; set; }
+    public DbSet<SavedRecipe> SavedRecipe { get; set; }
+    public DbSet<UserFollower> UserFollower { get; set; }
+    public DbSet<RecipeLike> RecipeLike { get; set; }
+    public DbSet<RecipeCategory> RecipeCategory { get; set; }
+    public DbSet<Category> Category { get; set; }
+    public DbSet<Instruction> Instruction { get; set; }
+    public DbSet<Ingredient> Ingredient { get; set; }
+    public DbSet<Country> Country { get; set; }
+    public DbSet<ChefRecipeRequest> ChefRecipeRequest { get; set; }
+    public DbSet<LoginAttempt> LoginAttempt { get; set; }
+    public DbSet<ApplicationUserRefreshToken> UserRefreshToken { get; set; }
+    public DbSet<PreferredDish> PreferredDish { get; set; }
+    public DbSet<UserPreferredDishes> UserPreferredDishes { get; set; }
+    public DbSet<UserPreferredCategory> UserPreferredCategory { get; set; }
+    public DbSet<UserPreferences> UserPreferences { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-
-        public DbSet<ApplicationUser> ApplicationUser { get; set; }
-        public DbSet<Recipe> Recipe { get; set; }
-        public DbSet<SavedRecipe> SavedRecipe { get; set; }
-        public DbSet<UserFollower> UserFollower { get; set; }
-        public DbSet<RecipeLike> RecipeLike { get; set; }
-        public DbSet<RecipeCategory> RecipeCategory { get; set; }
-        public DbSet<Category> Category { get; set; }
-        public DbSet<Instruction> Instruction { get; set; }
-        public DbSet<Ingredient> Ingredient { get; set; }
-        public DbSet<Country> Country { get; set; }
-        public DbSet<ChefRecipeRequest> ChefRecipeRequest { get; set; }
-        public DbSet<LoginAttempt> LoginAttempt { get; set; }
-        public DbSet<ApplicationUserRefreshToken> UserRefreshToken { get; set; }
-        public DbSet<PreferredDish> PreferredDish { get; set; }
-        public DbSet<UserPreferredDishes> UserPreferredDishes { get; set; }
-        public DbSet<UserPreferredCategory> UserPreferredCategory { get; set; }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-        }
+      base.OnModelCreating(modelBuilder);
+      modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
+  }
 }
