@@ -17,6 +17,7 @@ public static class ModuleInfrastructureDependencies
     services.AddTransient<IUserPreferredDishesRepository, UserPreferredDishesRepository>();
     services.AddTransient<IUserPreferredCategoriesRepository, UserPreferredCategoriesRepository>();
     services.AddTransient<IUserPreferencesRepository, UserPreferencesRepository>();
+    services.AddTransient<IRecipeRepository, RecipeRepository>();
 
     services.AddTransient(typeof(IGenericRepositoryAsync<>), typeof(GenericRepositoryAsync<>));
 

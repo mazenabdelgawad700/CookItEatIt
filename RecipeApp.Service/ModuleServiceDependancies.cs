@@ -21,6 +21,7 @@ public static class ModuleServiceDependencies
     services.AddTransient<IUserPreferredDishesService, UserPreferredDishesService>();
     services.AddTransient<IUserPreferredCategoriesService, UserPreferredCategoriesService>();
     services.AddTransient<IUserPreferencesService, UserPreferencesService>();
+    services.AddTransient<IRecipeService, RecipeService>();
     return services;
   }
 }
