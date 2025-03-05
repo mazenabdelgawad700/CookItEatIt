@@ -50,6 +50,11 @@ namespace RecipeApp.Infrastructure.Configurations
                    .WithOne(x => x.Recipe)
                    .HasForeignKey(x => x.RecipeId)
                    .OnDelete(DeleteBehavior.Cascade);
+
+            builder.ToTable("Recipe", "dbo", tb =>
+            {
+                tb.HasTrigger("tr_Recipe_UpdateRecipesCount");
+            });
         }
     }
 }

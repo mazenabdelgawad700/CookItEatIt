@@ -282,7 +282,7 @@ namespace RecipeApp.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserRefreshToken");
+                    b.ToTable("UserRefreshToken", (string)null);
                 });
 
             modelBuilder.Entity("RecipeApp.Domain.Entities.Identity.Role", b =>
@@ -330,7 +330,7 @@ namespace RecipeApp.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Category");
+                    b.ToTable("Category", (string)null);
                 });
 
             modelBuilder.Entity("RecipeApp.Domain.Entities.Models.ChefRecipeRequest", b =>
@@ -363,7 +363,7 @@ namespace RecipeApp.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ChefRecipeRequest");
+                    b.ToTable("ChefRecipeRequest", (string)null);
                 });
 
             modelBuilder.Entity("RecipeApp.Domain.Entities.Models.Country", b =>
@@ -380,7 +380,7 @@ namespace RecipeApp.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Country");
+                    b.ToTable("Country", (string)null);
                 });
 
             modelBuilder.Entity("RecipeApp.Domain.Entities.Models.Ingredient", b =>
@@ -412,7 +412,7 @@ namespace RecipeApp.Infrastructure.Migrations
 
                     b.HasIndex("RecipeId");
 
-                    b.ToTable("Ingredient");
+                    b.ToTable("Ingredient", (string)null);
                 });
 
             modelBuilder.Entity("RecipeApp.Domain.Entities.Models.Instruction", b =>
@@ -438,7 +438,7 @@ namespace RecipeApp.Infrastructure.Migrations
 
                     b.HasIndex("RecipeId");
 
-                    b.ToTable("Instruction");
+                    b.ToTable("Instruction", (string)null);
                 });
 
             modelBuilder.Entity("RecipeApp.Domain.Entities.Models.LoginAttempt", b =>
@@ -469,7 +469,7 @@ namespace RecipeApp.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("LoginAttempt");
+                    b.ToTable("LoginAttempt", (string)null);
                 });
 
             modelBuilder.Entity("RecipeApp.Domain.Entities.Models.PreferredDish", b =>
@@ -495,7 +495,7 @@ namespace RecipeApp.Infrastructure.Migrations
                     b.HasIndex("DishName")
                         .IsUnique();
 
-                    b.ToTable("PreferredDish");
+                    b.ToTable("PreferredDish", (string)null);
                 });
 
             modelBuilder.Entity("RecipeApp.Domain.Entities.Models.Recipe", b =>
@@ -550,7 +550,7 @@ namespace RecipeApp.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Recipe");
+                    b.ToTable("Recipe", (string)null);
                 });
 
             modelBuilder.Entity("RecipeApp.Domain.Entities.Models.RecipeCategory", b =>
@@ -565,7 +565,7 @@ namespace RecipeApp.Infrastructure.Migrations
 
                     b.HasIndex("RecipeId");
 
-                    b.ToTable("RecipeCategory");
+                    b.ToTable("RecipeCategory", (string)null);
                 });
 
             modelBuilder.Entity("RecipeApp.Domain.Entities.Models.RecipeLike", b =>
@@ -583,7 +583,7 @@ namespace RecipeApp.Infrastructure.Migrations
 
                     b.HasIndex("RecipeId");
 
-                    b.ToTable("RecipeLike");
+                    b.ToTable("RecipeLike", (string)null);
                 });
 
             modelBuilder.Entity("RecipeApp.Domain.Entities.Models.SavedRecipe", b =>
@@ -603,7 +603,7 @@ namespace RecipeApp.Infrastructure.Migrations
 
                     b.HasIndex("RecipeId");
 
-                    b.ToTable("SavedRecipe");
+                    b.ToTable("SavedRecipe", (string)null);
                 });
 
             modelBuilder.Entity("RecipeApp.Domain.Entities.Models.UserFollower", b =>
@@ -621,7 +621,7 @@ namespace RecipeApp.Infrastructure.Migrations
 
                     b.HasIndex("FollowerId");
 
-                    b.ToTable("UserFollower");
+                    b.ToTable("UserFollower", (string)null);
                 });
 
             modelBuilder.Entity("RecipeApp.Domain.Entities.Models.UserPreferences", b =>
@@ -655,7 +655,7 @@ namespace RecipeApp.Infrastructure.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("UserPreferences");
+                    b.ToTable("UserPreferences", (string)null);
                 });
 
             modelBuilder.Entity("RecipeApp.Domain.Entities.Models.UserPreferredCategory", b =>
@@ -670,7 +670,7 @@ namespace RecipeApp.Infrastructure.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("UserPreferredCategory");
+                    b.ToTable("UserPreferredCategory", (string)null);
                 });
 
             modelBuilder.Entity("RecipeApp.Domain.Entities.Models.UserPreferredDishes", b =>
@@ -685,7 +685,7 @@ namespace RecipeApp.Infrastructure.Migrations
 
                     b.HasIndex("PreferredDishId");
 
-                    b.ToTable("UserPreferredDishes");
+                    b.ToTable("UserPreferredDishes", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
