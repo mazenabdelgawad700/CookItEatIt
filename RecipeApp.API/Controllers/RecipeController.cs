@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RecipeApp.API.Base;
 using RecipeApp.Core.Features.RecipeFeature.Command.Model;
+using RecipeApp.Core.Features.RecipeFeature.Queries.Model;
 using RecipeApp.Shared.Bases;
 
 namespace RecipeApp.API.Controllers
@@ -38,6 +39,14 @@ namespace RecipeApp.API.Controllers
                 return Unauthorized(ReturnBaseHandler.Failed<bool>("You are not allowed to perform this action"));
 
             ReturnBase<bool> response = await Mediator.Send(command);
+            return NewResult(response);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> GetByIdAsync([FromBody] GetRecipeByIdQuery query)
+        {
+            var response = await Mediator.Send(query);
             return NewResult(response);
         }
     }

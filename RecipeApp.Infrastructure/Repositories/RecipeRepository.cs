@@ -33,21 +33,25 @@ namespace RecipeApp.Infrastructure.Repositories
             }
         }
 
-        public async Task<ReturnBase<int>> GetRecipeIdByName(string name)
+        public async Task<ReturnBase<Recipe>> GetRecipeById(int recipeId)
         {
             try
             {
-                Recipe? recipe = await _dbSet.Where(x => x.RecipeName.ToLower() == name.ToLower()).FirstOrDefaultAsync();
+                Recipe? recipe = await _dbSet
+                                            .Where(x => x.Id == recipeId)
+                                            .Include(x => x.Ingredients)
+                                            .Include(x => x.Instructions)
+                                            .FirstOrDefaultAsync();
 
                 if (recipe is null)
                 {
-                    return ReturnBaseHandler.NotFound<int>("Recipe not found");
+                    return ReturnBaseHandler.NotFound<Recipe>("Recipe not found");
                 }
-                return ReturnBaseHandler.Success(recipe.Id, "");
+                return ReturnBaseHandler.Success(recipe, "");
             }
             catch (Exception ex)
             {
-                return ReturnBaseHandler.Failed<int>(ex.Message);
+                return ReturnBaseHandler.Failed<Recipe>(ex.Message);
             }
         }
     }

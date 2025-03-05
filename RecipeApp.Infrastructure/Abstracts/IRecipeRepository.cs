@@ -6,7 +6,7 @@ namespace RecipeApp.Infrastructure.Abstracts
 {
     public interface IRecipeRepository : IGenericRepositoryAsync<Recipe>
     {
-        Task<ReturnBase<int>> GetRecipeIdByName(string name);
+        Task<ReturnBase<Recipe>> GetRecipeById(int recipeId);
         Task<ReturnBase<Recipe>> AddRecipeAsync(Recipe recipe);
     }
 }

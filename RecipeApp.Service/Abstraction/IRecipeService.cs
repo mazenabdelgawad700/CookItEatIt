@@ -7,6 +7,7 @@ namespace RecipeApp.Service.Abstraction
     public interface IRecipeService
     {
         Task<ReturnBase<int>> CreateRecipeAsync(Recipe recipe);
+        Task<ReturnBase<Recipe>> GetRecipeByIdAsync(int recipeId);
         Task<ReturnBase<bool>> AddRecipeImageAsync(int recipeId, IFormFile imageFile, string[] allowedExtensions);
     }
 }

@@ -89,5 +89,22 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<int>(ex.Message);
             }
         }
+
+        public async Task<ReturnBase<Recipe>> GetRecipeByIdAsync(int recipeId)
+        {
+            try
+            {
+                var getRecipeResult = await _recipeRepository.GetRecipeById(recipeId);
+
+                if (!getRecipeResult.Succeeded)
+                    return ReturnBaseHandler.Failed<Recipe>(getRecipeResult.Message);
+
+                return ReturnBaseHandler.Success(getRecipeResult.Data, "Recipe Found Successfully");
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<Recipe>(ex.Message);
+            }
+        }
     }
 }
