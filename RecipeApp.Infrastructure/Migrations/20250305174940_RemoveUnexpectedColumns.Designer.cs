@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RecipeApp.Infrastructure.Context;
 
@@ -11,9 +12,11 @@ using RecipeApp.Infrastructure.Context;
 namespace RecipeApp.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250305174940_RemoveUnexpectedColumns")]
+    partial class RemoveUnexpectedColumns
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -518,6 +521,7 @@ namespace RecipeApp.Infrastructure.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("ImgURL")
+                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
@@ -535,6 +539,12 @@ namespace RecipeApp.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<int?>("SavedRecipeRecipeId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SavedRecipeUserId")
+                        .HasColumnType("int");
+
                     b.Property<byte>("ServesCount")
                         .HasColumnType("tinyint");
 
@@ -549,6 +559,8 @@ namespace RecipeApp.Infrastructure.Migrations
                     b.HasIndex("PreferredDishId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("SavedRecipeUserId", "SavedRecipeRecipeId");
 
                     b.ToTable("Recipe");
                 });
@@ -595,13 +607,9 @@ namespace RecipeApp.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<DateTime>("SavedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
+                        .HasColumnType("datetime2");
 
                     b.HasKey("UserId", "RecipeId");
-
-                    b.HasIndex("RecipeId");
 
                     b.ToTable("SavedRecipe");
                 });
@@ -826,6 +834,10 @@ namespace RecipeApp.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("RecipeApp.Domain.Entities.Models.SavedRecipe", null)
+                        .WithMany("Recipes")
+                        .HasForeignKey("SavedRecipeUserId", "SavedRecipeRecipeId");
+
                     b.Navigation("PreferredDish");
 
                     b.Navigation("User");
@@ -871,19 +883,11 @@ namespace RecipeApp.Infrastructure.Migrations
 
             modelBuilder.Entity("RecipeApp.Domain.Entities.Models.SavedRecipe", b =>
                 {
-                    b.HasOne("RecipeApp.Domain.Entities.Models.Recipe", "Recipe")
-                        .WithMany("SavedRecipes")
-                        .HasForeignKey("RecipeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("RecipeApp.Domain.Entities.Identity.ApplicationUser", "User")
                         .WithMany("SavedRecipes")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("Recipe");
 
                     b.Navigation("User");
                 });
@@ -1008,8 +1012,11 @@ namespace RecipeApp.Infrastructure.Migrations
                     b.Navigation("Instructions");
 
                     b.Navigation("Likes");
+                });
 
-                    b.Navigation("SavedRecipes");
+            modelBuilder.Entity("RecipeApp.Domain.Entities.Models.SavedRecipe", b =>
+                {
+                    b.Navigation("Recipes");
                 });
 #pragma warning restore 612, 618
         }

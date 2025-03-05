@@ -9,8 +9,8 @@ namespace RecipeApp.Domain.Entities.Models
         public int PreferredDishId { get; set; }
         public string RecipeName { get; set; } = null!;
         public string Description { get; set; } = null!;
-        public string ImgURL { get; set; } = null!;
-        public int ServesCount { get; set; }
+        public string? ImgURL { get; set; }
+        public byte ServesCount { get; set; }
         public int CookTimeMinutes { get; set; }
         public bool IsVegetarian { get; set; }
         public int LikesCount { get; set; }
@@ -22,5 +22,6 @@ namespace RecipeApp.Domain.Entities.Models
         public virtual ICollection<Instruction> Instructions { get; set; }
         public virtual ICollection<Category> Categories { get; set; }
         public virtual ICollection<RecipeLike> Likes { get; set; }
+        public virtual ICollection<SavedRecipe> SavedRecipes { get; set; }
     }
 }

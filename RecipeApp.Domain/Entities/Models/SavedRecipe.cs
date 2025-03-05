@@ -8,6 +8,6 @@ namespace RecipeApp.Domain.Entities.Models
         public int RecipeId { get; set; }
         public DateTime SavedAt { get; set; } = DateTime.Now;
         public virtual ApplicationUser User { get; set; }
-        public virtual ICollection<Recipe> Recipes { get; set; }
+        public virtual Recipe Recipe { get; set; }
     }
 }

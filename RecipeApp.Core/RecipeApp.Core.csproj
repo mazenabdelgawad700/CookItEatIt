@@ -28,9 +28,6 @@
     <Folder Include="Features\PreferredDishFeature\Queries\Handler\" />
     <Folder Include="Features\PreferredDishFeature\Queries\Model\" />
     <Folder Include="Features\PreferredDishFeature\Queries\Response\" />
-    <Folder Include="Features\RecipeFeature\Command\Handler\" />
-    <Folder Include="Features\RecipeFeature\Command\Model\" />
-    <Folder Include="Features\RecipeFeature\Command\Validator\" />
     <Folder Include="Features\RecipeFeature\Queries\Handler\" />
     <Folder Include="Features\RecipeFeature\Queries\Model\" />
     <Folder Include="Features\RecipeFeature\Queries\Response\" />
