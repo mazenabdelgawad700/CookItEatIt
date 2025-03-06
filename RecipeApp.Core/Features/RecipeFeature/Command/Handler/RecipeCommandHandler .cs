@@ -9,7 +9,9 @@ using RecipeApp.Shared.Bases;
 namespace RecipeApp.Core.Features.RecipeFeature.Command.Handler
 {
     public class RecipeCommandHandler : IRequestHandler<CreateRecipeCommand, ReturnBase<int>>,
-         IRequestHandler<AddRecipeImageCommand, ReturnBase<bool>>
+         IRequestHandler<AddRecipeImageCommand, ReturnBase<bool>>,
+         IRequestHandler<UpdateRecipeCommand, ReturnBase<bool>>,
+         IRequestHandler<UpdateRecipeImageCommand, ReturnBase<bool>>
     {
         private readonly IRecipeService _recipeService;
         private readonly IRecipeRepository _recipeRepository;
@@ -52,6 +54,42 @@ namespace RecipeApp.Core.Features.RecipeFeature.Command.Handler
                     return ReturnBaseHandler.Failed<bool>(addRecipeImageResult.Message);
 
                 return ReturnBaseHandler.Created(true, "Recipe Image Added Successfully");
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
+            }
+        }
+
+        public async Task<ReturnBase<bool>> Handle(UpdateRecipeCommand request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                Recipe mappedResult = _mapper.Map<Recipe>(request);
+
+                ReturnBase<bool> updateRecipeResult = await _recipeService.UpdateRecipeAsync(mappedResult);
+
+                if (!updateRecipeResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(updateRecipeResult.Message);
+
+                return ReturnBaseHandler.Success(true, "Recipe Updated Successfully");
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
+            }
+        }
+
+        public async Task<ReturnBase<bool>> Handle(UpdateRecipeImageCommand request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                ReturnBase<bool> addRecipeImageResult = await _recipeService.UpdateRecipeImageAsync(request.Id, request.ImageFile, allowedFileExtensions);
+
+                if (!addRecipeImageResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(addRecipeImageResult.Message);
+
+                return ReturnBaseHandler.Updated<bool>(addRecipeImageResult.Message);
             }
             catch (Exception ex)
             {

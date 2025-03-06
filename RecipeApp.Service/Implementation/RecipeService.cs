@@ -106,5 +106,81 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<Recipe>(ex.Message);
             }
         }
+        public async Task<ReturnBase<bool>> UpdateRecipeAsync(Recipe recipe)
+        {
+            try
+            {
+                ReturnBase<Recipe> getRecipeResult = await _recipeRepository.GetRecipeByIdAsNoTracking(recipe.Id);
+
+                if (!getRecipeResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(getRecipeResult.Message);
+
+                if (string.IsNullOrEmpty(recipe.RecipeName) || string.IsNullOrEmpty(recipe.Description) || recipe.ServesCount == 0 || recipe.CookTimeMinutes == 0 || recipe.Ingredients.Count == 0 || recipe.Instructions.Count == 0)
+                    return ReturnBaseHandler.Failed<bool>("Invalid input");
+
+                // Check if ingredients and instructions are valid 
+
+                recipe.ImgURL = getRecipeResult.Data.ImgURL;
+
+                ReturnBase<bool> updateRecipeResult = await _recipeRepository.UpdateAsync(recipe);
+
+                if (!updateRecipeResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(updateRecipeResult.Message);
+
+
+                recipe.UpdatedAt = DateTime.UtcNow;
+                await _recipeRepository.SaveChangesAsync();
+
+                return ReturnBaseHandler.Success(true, "Recipe Updated Successfully");
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
+            }
+        }
+
+        public async Task<ReturnBase<bool>> UpdateRecipeImageAsync(int recipeId, IFormFile imageFile, string[] allowedExtensions)
+        {
+            var transaction = await _recipeRepository.BeginTransactionAsync();
+            try
+            {
+                var getRecipeResult = await _recipeRepository.GetByIdAsync(recipeId);
+
+                if (!getRecipeResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(getRecipeResult.Message);
+
+                if (getRecipeResult.Data.ImgURL is not null)
+                {
+                    int startIndex = getRecipeResult.Data.ImgURL.LastIndexOf('\\');
+                    string pictureName = getRecipeResult.Data.ImgURL.Substring(startIndex + 1);
+                    ReturnBase<bool> deletePictureResult = _fileService.DeleteFile(pictureName);
+
+                    if (!deletePictureResult.Succeeded)
+                    {
+                        await transaction.RollbackAsync();
+                        return ReturnBaseHandler.Failed<bool>(deletePictureResult.Message);
+                    }
+                }
+
+                var saveImageResult = await _fileService.SaveFileAsync(imageFile, allowedExtensions);
+
+                if (!saveImageResult.Succeeded)
+                {
+                    await transaction.RollbackAsync();
+                    return ReturnBaseHandler.Failed<bool>(saveImageResult.Message);
+                }
+
+                getRecipeResult.Data.ImgURL = saveImageResult.Data;
+                getRecipeResult.Data.UpdatedAt = DateTime.UtcNow;
+                await _recipeRepository.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return ReturnBaseHandler.Updated<bool>("Recipe Image Updated Successfully");
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
+            }
+        }
     }
 }

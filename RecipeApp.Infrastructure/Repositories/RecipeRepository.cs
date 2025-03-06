@@ -54,5 +54,23 @@ namespace RecipeApp.Infrastructure.Repositories
                 return ReturnBaseHandler.Failed<Recipe>(ex.Message);
             }
         }
+
+        public async Task<ReturnBase<Recipe>> GetRecipeByIdAsNoTracking(int recipeId)
+        {
+            try
+            {
+                Recipe? recipe = await _dbSet.Where(x => x.Id == recipeId).AsNoTracking().FirstOrDefaultAsync();
+
+                if (recipe is null)
+                {
+                    return ReturnBaseHandler.NotFound<Recipe>("Recipe not found");
+                }
+                return ReturnBaseHandler.Success(recipe, "");
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<Recipe>(ex.Message);
+            }
+        }
     }
 }
