@@ -106,6 +106,23 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<Recipe>(ex.Message);
             }
         }
+
+        public ReturnBase<IQueryable<Recipe>> GetRecipesForUser(int userId)
+        {
+            try
+            {
+                var getRecipesResult = _recipeRepository.GetRecipesForUser(userId);
+
+                if (getRecipesResult.Succeeded)
+                    return ReturnBaseHandler.Success(getRecipesResult.Data, "");
+                return ReturnBaseHandler.Failed<IQueryable<Recipe>>(getRecipesResult.Message);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<IQueryable<Recipe>>(ex.Message);
+            }
+        }
+
         public async Task<ReturnBase<bool>> UpdateRecipeAsync(Recipe recipe)
         {
             try

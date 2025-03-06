@@ -10,6 +10,7 @@ namespace RecipeApp.Service.Abstraction
         Task<ReturnBase<bool>> UpdateRecipeAsync(Recipe recipe);
         Task<ReturnBase<bool>> UpdateRecipeImageAsync(int recipeId, IFormFile imageFile, string[] allowedExtensions);
         Task<ReturnBase<Recipe>> GetRecipeByIdAsync(int recipeId);
+        ReturnBase<IQueryable<Recipe>> GetRecipesForUser(int userId);
         Task<ReturnBase<bool>> AddRecipeImageAsync(int recipeId, IFormFile imageFile, string[] allowedExtensions);
     }
 }

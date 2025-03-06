@@ -7,7 +7,8 @@ using RecipeApp.Shared.Bases;
 
 namespace RecipeApp.Core.Features.RecipeFeature.Queries.Handler
 {
-    public class RecipeQueryHandler : IRequestHandler<GetRecipeByIdQuery, ReturnBase<GetRecipeByIdResponse>>
+    public class RecipeQueryHandler : IRequestHandler<GetRecipeByIdQuery, ReturnBase<GetRecipeByIdResponse>>,
+        IRequestHandler<GetRecipesForUserQuery, ReturnBase<IQueryable<GetRecipesForUserResponse>>>
     {
         private readonly IRecipeService _recipeService;
         private readonly IMapper _mapper;
@@ -37,6 +38,25 @@ namespace RecipeApp.Core.Features.RecipeFeature.Queries.Handler
             catch (Exception ex)
             {
                 return ReturnBaseHandler.Failed<GetRecipeByIdResponse>(ex.Message);
+            }
+        }
+
+        public async Task<ReturnBase<IQueryable<GetRecipesForUserResponse>>> Handle(GetRecipesForUserQuery request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var getRecipeByIdResult = _recipeService.GetRecipesForUser(request.UserId);
+
+                if (!getRecipeByIdResult.Succeeded)
+                    return ReturnBaseHandler.Failed<IQueryable<GetRecipesForUserResponse>>(getRecipeByIdResult.Message);
+
+                var mappedResult = _mapper.ProjectTo<GetRecipesForUserResponse>(getRecipeByIdResult.Data);
+
+                return ReturnBaseHandler.Success(mappedResult, "");
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<IQueryable<GetRecipesForUserResponse>>(ex.Message);
             }
         }
     }

@@ -72,5 +72,24 @@ namespace RecipeApp.Infrastructure.Repositories
                 return ReturnBaseHandler.Failed<Recipe>(ex.Message);
             }
         }
+
+        public ReturnBase<IQueryable<Recipe>> GetRecipesForUser(int userId)
+        {
+            try
+            {
+                var recipes = _dbSet
+                                .Where(x => x.UserId == userId)
+                                .AsNoTracking();
+
+                if (recipes is not null)
+                    return ReturnBaseHandler.Success(recipes, "");
+
+                return ReturnBaseHandler.Failed<IQueryable<Recipe>>("Can not get recipes, check user id");
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<IQueryable<Recipe>>(ex.Message);
+            }
+        }
     }
 }
