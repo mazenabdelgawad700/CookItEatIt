@@ -23,5 +23,6 @@ namespace RecipeApp.Domain.Entities.Models
         public virtual ICollection<Category> Categories { get; set; }
         public virtual ICollection<RecipeLike> Likes { get; set; }
         public virtual ICollection<SavedRecipe> SavedRecipes { get; set; }
+        public virtual ICollection<RecipeCategory> RecipeCategories { get; set; }
     }
 }

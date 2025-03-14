@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using RecipeApp.Domain.Entities.Identity;
 using RecipeApp.Domain.Entities.Models;
 using RecipeApp.Infrastructure.Abstracts;
@@ -11,6 +12,8 @@ namespace RecipeApp.Service.Implementation
     public class RecipeService : IRecipeService
     {
         private readonly IRecipeRepository _recipeRepository;
+        private readonly IRecipeCategoryRepository _recipeCategoryRepository;
+        private readonly ICategoryRepository _categoryRepository;
         private readonly IApplicationUserRepository _applicationUserRepository;
         private readonly IFileService _fileService;
         private readonly UserManager<ApplicationUser> _userManager;
@@ -18,14 +21,50 @@ namespace RecipeApp.Service.Implementation
         public RecipeService(
             IRecipeRepository recipeRepository,
             IFileService fileService, UserManager<ApplicationUser> userManager
-            , IApplicationUserRepository applicationUserRepository)
+            , IApplicationUserRepository applicationUserRepository, IRecipeCategoryRepository recipeCategoryRepository, ICategoryRepository categoryRepository)
         {
             _recipeRepository = recipeRepository;
             _applicationUserRepository = applicationUserRepository;
             _fileService = fileService;
             _userManager = userManager;
+            _recipeCategoryRepository = recipeCategoryRepository;
+            _categoryRepository = categoryRepository;
         }
 
+        public async Task<ReturnBase<bool>> AddRecipeCategoriesAsync(int recipeId, List<int> categoryIds)
+        {
+            try
+            {
+                var getRecipeResult = await _recipeRepository.GetByIdAsync(recipeId);
+
+                if (!getRecipeResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(getRecipeResult.Message);
+
+                var validateCategoriesResult = await _categoryRepository.GetTableNoTracking()
+                    .Data.Where(c => categoryIds.Contains(c.Id))
+                         .CountAsync();
+
+                if (validateCategoriesResult != categoryIds.Count)
+                    return ReturnBaseHandler.Failed<bool>("One or more categories are invalid");
+
+
+                var addRecipeCategoryResult = await _recipeCategoryRepository
+                    .AddRangeAsync(categoryIds.Select(c => new RecipeCategory
+                    {
+                        RecipeId = recipeId,
+                        CategoryId = c
+                    }).ToList());
+
+                if (!addRecipeCategoryResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(addRecipeCategoryResult.Message);
+
+                return ReturnBaseHandler.Success(true, "");
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
+            }
+        }
         public async Task<ReturnBase<bool>> AddRecipeImageAsync(int recipeId, IFormFile imageFile, string[] allowedExtensions)
         {
             try
@@ -89,7 +128,6 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<int>(ex.Message);
             }
         }
-
         public async Task<ReturnBase<Recipe>> GetRecipeByIdAsync(int recipeId)
         {
             try
@@ -106,7 +144,6 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<Recipe>(ex.Message);
             }
         }
-
         public ReturnBase<IQueryable<Recipe>> GetRecipesForUser(int userId)
         {
             try
@@ -122,7 +159,6 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<IQueryable<Recipe>>(ex.Message);
             }
         }
-
         public async Task<ReturnBase<bool>> UpdateRecipeAsync(Recipe recipe)
         {
             try
@@ -155,7 +191,51 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<bool>(ex.Message);
             }
         }
+        public async Task<ReturnBase<bool>> UpdateRecipeCategoriesAsync(int recipeId, List<int> categoryIds)
+        {
+            try
+            {
+                var getRecipeResult = await _recipeRepository.GetByIdAsync(recipeId);
 
+                if (!getRecipeResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(getRecipeResult.Message);
+
+                var validateCategoriesResult = await _categoryRepository.GetTableNoTracking()
+                    .Data.Where(c => categoryIds.Contains(c.Id))
+                         .CountAsync();
+
+                if (validateCategoriesResult != categoryIds.Count)
+                    return ReturnBaseHandler.Failed<bool>("One or more categories are invalid");
+
+                var existingRecipeCategories = await _recipeCategoryRepository.GetTableNoTracking()
+                    .Data.Where(rc => rc.RecipeId == recipeId)
+                    .ToListAsync();
+
+                if (existingRecipeCategories.Any())
+                {
+                    var deleteResult = await _recipeCategoryRepository.DeleteRangeAsync(existingRecipeCategories);
+                    if (!deleteResult.Succeeded)
+                        return ReturnBaseHandler.Failed<bool>(deleteResult.Message);
+                }
+
+                var newRecipeCategories = categoryIds.Select(c => new RecipeCategory
+                {
+                    RecipeId = recipeId,
+                    CategoryId = c
+                }).ToList();
+
+                var addRecipeCategoryResult = await _recipeCategoryRepository.AddRangeAsync(newRecipeCategories);
+
+                if (!addRecipeCategoryResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(addRecipeCategoryResult.Message);
+
+                return ReturnBaseHandler.Success(true, "");
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
+            }
+        }
         public async Task<ReturnBase<bool>> UpdateRecipeImageAsync(int recipeId, IFormFile imageFile, string[] allowedExtensions)
         {
             var transaction = await _recipeRepository.BeginTransactionAsync();

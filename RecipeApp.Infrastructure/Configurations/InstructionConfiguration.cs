@@ -8,7 +8,7 @@ namespace RecipeApp.Infrastructure.Configurations
     {
         public void Configure(EntityTypeBuilder<Instruction> builder)
         {
-            builder.HasKey(x => x.Id);
+            builder.HasKey(x => new { x.RecipeId, x.InstructionNumber });
 
             builder.Property(x => x.InstructionNumber)
                    .IsRequired();

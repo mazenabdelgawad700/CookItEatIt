@@ -10,8 +10,10 @@ namespace RecipeApp.Infrastructure.Repositories
     public class RecipeRepository : GenericRepositoryAsync<Recipe>, IRecipeRepository
     {
         private readonly DbSet<Recipe> _dbSet;
+        private readonly AppDbContext _dbContext;
         public RecipeRepository(AppDbContext dbContext) : base(dbContext)
         {
+            _dbContext = dbContext;
             _dbSet = dbContext.Set<Recipe>();
         }
 
@@ -22,9 +24,8 @@ namespace RecipeApp.Infrastructure.Repositories
                 var addRecipeResult = await _dbSet.AddAsync(recipe);
 
                 if (addRecipeResult is null)
-                {
-                    return ReturnBaseHandler.NotFound<Recipe>("Failed to add recipe");
-                }
+                    return ReturnBaseHandler.Failed<Recipe>("Failed to add recipe");
+
                 return ReturnBaseHandler.Success(addRecipeResult.Entity, "");
             }
             catch (Exception ex)
@@ -41,6 +42,8 @@ namespace RecipeApp.Infrastructure.Repositories
                                             .Where(x => x.Id == recipeId)
                                             .Include(x => x.Ingredients)
                                             .Include(x => x.Instructions)
+                                            .Include(x => x.RecipeCategories)
+                                            .ThenInclude(rc => rc.Category)
                                             .FirstOrDefaultAsync();
 
                 if (recipe is null)

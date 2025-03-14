@@ -34,9 +34,18 @@ namespace RecipeApp.Core.Features.RecipeFeature.Command.Handler
                 var mappedResult = _mapper.Map<Recipe>(request);
 
                 var createRecipeResult = await _recipeService.CreateRecipeAsync(mappedResult);
-                if (createRecipeResult.Succeeded)
-                    return ReturnBaseHandler.Created(createRecipeResult.Data, "Recipe Added Successfully");
-                return ReturnBaseHandler.Failed<int>(createRecipeResult.Message);
+
+                if (!createRecipeResult.Succeeded)
+
+                    return ReturnBaseHandler.Failed<int>(createRecipeResult.Message);
+
+                var addRecipeCategoryResult = await _recipeService.AddRecipeCategoriesAsync(createRecipeResult.Data, request.CategoryIds);
+
+                if (!addRecipeCategoryResult.Succeeded)
+                    return ReturnBaseHandler.Failed<int>(addRecipeCategoryResult.Message);
+
+                await _recipeRepository.SaveChangesAsync();
+                return ReturnBaseHandler.Created(createRecipeResult.Data, "Recipe Added Successfully");
             }
             catch (Exception ex)
             {
@@ -71,6 +80,11 @@ namespace RecipeApp.Core.Features.RecipeFeature.Command.Handler
 
                 if (!updateRecipeResult.Succeeded)
                     return ReturnBaseHandler.Failed<bool>(updateRecipeResult.Message);
+
+                var updateRecipeCategoryResult = await _recipeService.UpdateRecipeCategoriesAsync(request.RecipeId, request.CategoryIds);
+
+                if (!updateRecipeCategoryResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(updateRecipeCategoryResult.Message);
 
                 return ReturnBaseHandler.Success(true, "Recipe Updated Successfully");
             }

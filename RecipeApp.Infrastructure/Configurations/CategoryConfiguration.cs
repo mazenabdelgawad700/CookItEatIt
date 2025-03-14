@@ -15,15 +15,19 @@ namespace RecipeApp.Infrastructure.Configurations
                    .HasMaxLength(100);
 
             // Relationship with Recipes (Many-to-Many)
-            builder.HasMany(x => x.Recipes)
-                   .WithMany(x => x.Categories)
+            builder.HasMany(c => c.Recipes)
+                   .WithMany(r => r.Categories)
                    .UsingEntity<RecipeCategory>(
                        j => j.HasOne(rc => rc.Recipe)
-                             .WithMany()
+                             .WithMany(r => r.RecipeCategories)
                              .HasForeignKey(rc => rc.RecipeId),
                        j => j.HasOne(rc => rc.Category)
-                             .WithMany()
-                             .HasForeignKey(rc => rc.CategoryId)
+                             .WithMany(c => c.RecipeCategories)
+                             .HasForeignKey(rc => rc.CategoryId),
+                       j =>
+                       {
+                           j.HasKey(rc => new { rc.RecipeId, rc.CategoryId });
+                       }
                    );
 
             // Many-to-many with ApplicationUser via UserPreferredCategory

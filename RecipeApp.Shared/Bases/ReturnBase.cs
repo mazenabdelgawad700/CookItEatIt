@@ -23,7 +23,6 @@ public class ReturnBase<T>
         Errors = new List<string>();
         Data = data;
     }
-
     public HttpStatusCode StatusCode { get; set; }
     public bool Succeeded { get; set; }
     public string Message { get; set; }

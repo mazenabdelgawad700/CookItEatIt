@@ -2,13 +2,14 @@
 using MediatR;
 using RecipeApp.Core.Features.RecipeFeature.Queries.Model;
 using RecipeApp.Core.Features.RecipeFeature.Queries.Response;
+using RecipeApp.Core.Wrappers;
 using RecipeApp.Service.Abstraction;
 using RecipeApp.Shared.Bases;
 
 namespace RecipeApp.Core.Features.RecipeFeature.Queries.Handler
 {
     public class RecipeQueryHandler : IRequestHandler<GetRecipeByIdQuery, ReturnBase<GetRecipeByIdResponse>>,
-        IRequestHandler<GetRecipesForUserQuery, ReturnBase<IQueryable<GetRecipesForUserResponse>>>
+        IRequestHandler<GetRecipesForUserQuery, ReturnBase<PaginatedResult<GetRecipesForUserResponse>>>
     {
         private readonly IRecipeService _recipeService;
         private readonly IMapper _mapper;
@@ -41,22 +42,22 @@ namespace RecipeApp.Core.Features.RecipeFeature.Queries.Handler
             }
         }
 
-        public async Task<ReturnBase<IQueryable<GetRecipesForUserResponse>>> Handle(GetRecipesForUserQuery request, CancellationToken cancellationToken)
+        public async Task<ReturnBase<PaginatedResult<GetRecipesForUserResponse>>> Handle(GetRecipesForUserQuery request, CancellationToken cancellationToken)
         {
             try
             {
                 var getRecipeByIdResult = _recipeService.GetRecipesForUser(request.UserId);
 
                 if (!getRecipeByIdResult.Succeeded)
-                    return ReturnBaseHandler.Failed<IQueryable<GetRecipesForUserResponse>>(getRecipeByIdResult.Message);
+                    return ReturnBaseHandler.Failed<PaginatedResult<GetRecipesForUserResponse>>(getRecipeByIdResult.Message);
 
-                var mappedResult = _mapper.ProjectTo<GetRecipesForUserResponse>(getRecipeByIdResult.Data);
+                var mappedResult = await _mapper.ProjectTo<GetRecipesForUserResponse>(getRecipeByIdResult.Data).ToPaginatedListAsync(request.PageNumber, request.PageSize);
 
                 return ReturnBaseHandler.Success(mappedResult, "");
             }
             catch (Exception ex)
             {
-                return ReturnBaseHandler.Failed<IQueryable<GetRecipesForUserResponse>>(ex.Message);
+                return ReturnBaseHandler.Failed<PaginatedResult<GetRecipesForUserResponse>>(ex.Message);
             }
         }
     }

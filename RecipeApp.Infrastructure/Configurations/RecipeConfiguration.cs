@@ -33,6 +33,22 @@ namespace RecipeApp.Infrastructure.Configurations
             builder.Property(x => x.CreatedAt)
                    .IsRequired();
 
+            // Relationship with Categories (Many-to-Many)
+            builder.HasMany(r => r.Categories)
+                   .WithMany(c => c.Recipes)
+                   .UsingEntity<RecipeCategory>(
+                       j => j.HasOne(rc => rc.Category)
+                             .WithMany(c => c.RecipeCategories)
+                             .HasForeignKey(rc => rc.CategoryId),
+                       j => j.HasOne(rc => rc.Recipe)
+                             .WithMany(r => r.RecipeCategories)
+                             .HasForeignKey(rc => rc.RecipeId),
+                       j =>
+                       {
+                           j.HasKey(rc => new { rc.RecipeId, rc.CategoryId });
+                       }
+                   );
+
             // Relationship with User (Creator)
             builder.HasOne(x => x.User)
                    .WithMany(x => x.Recipes)

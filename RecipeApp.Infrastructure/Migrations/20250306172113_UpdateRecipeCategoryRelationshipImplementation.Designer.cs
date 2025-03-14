@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RecipeApp.Infrastructure.Context;
 
@@ -11,9 +12,11 @@ using RecipeApp.Infrastructure.Context;
 namespace RecipeApp.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250306172113_UpdateRecipeCategoryRelationshipImplementation")]
+    partial class UpdateRecipeCategoryRelationshipImplementation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -417,18 +420,26 @@ namespace RecipeApp.Infrastructure.Migrations
 
             modelBuilder.Entity("RecipeApp.Domain.Entities.Models.Instruction", b =>
                 {
-                    b.Property<int>("RecipeId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<byte>("InstructionNumber")
-                        .HasColumnType("tinyint");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.HasKey("RecipeId", "InstructionNumber");
+                    b.Property<byte>("InstructionNumber")
+                        .HasColumnType("tinyint");
+
+                    b.Property<int>("RecipeId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RecipeId");
 
                     b.ToTable("Instruction");
                 });

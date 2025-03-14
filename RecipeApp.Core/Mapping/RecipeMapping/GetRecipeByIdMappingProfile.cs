@@ -14,6 +14,7 @@ namespace RecipeApp.Core.Mapping.RecipeMapping
 
             CreateMap<CreateIngredientDto, Ingredient>();
             CreateMap<CreateInstructionDto, Instruction>();
+            CreateMap<CategoryDto, Category>();
 
             CreateMap<Recipe, GetRecipeByIdResponse>()
                 .ForMember(dest => dest.Ingredients, opt => opt.MapFrom(src => src.Ingredients))
@@ -21,6 +22,7 @@ namespace RecipeApp.Core.Mapping.RecipeMapping
 
             CreateMap<Ingredient, CreateIngredientDto>();
             CreateMap<Instruction, CreateInstructionDto>();
+            CreateMap<Category, CategoryDto>();
         }
     }
 }

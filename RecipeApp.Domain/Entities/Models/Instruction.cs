@@ -2,7 +2,6 @@
 {
     public class Instruction
     {
-        public int Id { get; set; }
         public int RecipeId { get; set; }
         public byte InstructionNumber { get; set; }
         public string Description { get; set; } = null!;
