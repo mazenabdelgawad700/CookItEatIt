@@ -35,7 +35,7 @@ namespace RecipeApp.Infrastructure.Repositories
             }
         }
 
-        public async Task<ReturnBase<Recipe>> GetRecipeByIdToDelete(int recipeId)
+        public async Task<ReturnBase<Recipe>> GetRecipeByIdToDeleteAsync(int recipeId)
         {
             try
             {
@@ -60,7 +60,7 @@ namespace RecipeApp.Infrastructure.Repositories
             }
         }
 
-        public async Task<ReturnBase<Recipe>> GetRecipeById(int recipeId)
+        public async Task<ReturnBase<Recipe>> GetRecipeByIdAsync(int recipeId)
         {
             try
             {
@@ -84,7 +84,7 @@ namespace RecipeApp.Infrastructure.Repositories
             }
         }
 
-        public async Task<ReturnBase<Recipe>> GetRecipeByIdAsNoTracking(int recipeId)
+        public async Task<ReturnBase<Recipe>> GetRecipeByIdAsNoTrackingAsync(int recipeId)
         {
             try
             {
@@ -102,7 +102,7 @@ namespace RecipeApp.Infrastructure.Repositories
             }
         }
 
-        public ReturnBase<IQueryable<Recipe>> GetRecipesForUser(int userId)
+        public ReturnBase<IQueryable<Recipe>> GetRecipesForUserAsync(int userId)
         {
             try
             {

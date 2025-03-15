@@ -113,5 +113,12 @@ namespace RecipeApp.API.Controllers
             var response = await Mediator.Send(query);
             return NewResult(response);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> GetAllRecipesAsync([FromBody] GetAllRecipesAsPaginatedQuery query)
+        {
+            var response = await Mediator.Send(query);
+            return NewResult(response);
+        }
     }
 }

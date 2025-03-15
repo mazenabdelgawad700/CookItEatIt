@@ -9,7 +9,8 @@ using RecipeApp.Shared.Bases;
 namespace RecipeApp.Core.Features.RecipeFeature.Queries.Handler
 {
     public class RecipeQueryHandler : IRequestHandler<GetRecipeByIdQuery, ReturnBase<GetRecipeByIdResponse>>,
-        IRequestHandler<GetRecipesForUserQuery, ReturnBase<PaginatedResult<GetRecipesForUserResponse>>>
+        IRequestHandler<GetRecipesForUserQuery, ReturnBase<PaginatedResult<GetRecipesForUserResponse>>>,
+        IRequestHandler<GetAllRecipesAsPaginatedQuery, ReturnBase<PaginatedResult<GetAllRecipesResponse>>>
     {
         private readonly IRecipeService _recipeService;
         private readonly IMapper _mapper;
@@ -55,7 +56,7 @@ namespace RecipeApp.Core.Features.RecipeFeature.Queries.Handler
         {
             try
             {
-                var getRecipeByIdResult = _recipeService.GetRecipesForUser(request.UserId);
+                var getRecipeByIdResult = _recipeService.GetRecipesForUserAsync(request.UserId);
 
                 if (!getRecipeByIdResult.Succeeded)
                     return ReturnBaseHandler.Failed<PaginatedResult<GetRecipesForUserResponse>>(getRecipeByIdResult.Message);
@@ -67,6 +68,25 @@ namespace RecipeApp.Core.Features.RecipeFeature.Queries.Handler
             catch (Exception ex)
             {
                 return ReturnBaseHandler.Failed<PaginatedResult<GetRecipesForUserResponse>>(ex.Message);
+            }
+        }
+
+        public async Task<ReturnBase<PaginatedResult<GetAllRecipesResponse>>> Handle(GetAllRecipesAsPaginatedQuery request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var getRecipesResult = _recipeService.GetAllRecipes(request.CategoryId);
+
+                if (!getRecipesResult.Succeeded)
+                    return ReturnBaseHandler.Failed<PaginatedResult<GetAllRecipesResponse>>(getRecipesResult.Message);
+
+                var mappedResult = await _mapper.ProjectTo<GetAllRecipesResponse>(getRecipesResult.Data).ToPaginatedListAsync(request.PageNumber, request.PageSize);
+
+                return ReturnBaseHandler.Success(mappedResult, "");
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<PaginatedResult<GetAllRecipesResponse>>(ex.Message);
             }
         }
     }

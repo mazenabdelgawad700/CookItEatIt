@@ -142,7 +142,7 @@ namespace RecipeApp.Service.Implementation
             var transaction = await _recipeRepository.BeginTransactionAsync();
             try
             {
-                ReturnBase<Recipe>? getRecipeResult = await _recipeRepository.GetRecipeByIdToDelete(recipe.Id);
+                ReturnBase<Recipe>? getRecipeResult = await _recipeRepository.GetRecipeByIdToDeleteAsync(recipe.Id);
 
                 if (!getRecipeResult.Succeeded)
                     return ReturnBaseHandler.Failed<bool>(getRecipeResult.Message);
@@ -239,11 +239,35 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<bool>(ex.Message);
             }
         }
+
+        public ReturnBase<IQueryable<Recipe>> GetAllRecipes(int? filter = null)
+        {
+            try
+            {
+                var query = _recipeRepository.GetTableNoTracking()
+                    .Data
+                    .Include(x => x.User)
+                    .Include(x => x.RecipeCategories)
+                    .AsQueryable();
+
+                if (filter.HasValue)
+                {
+                    query = query.Where(x => x.RecipeCategories.Any(rc => rc.CategoryId == filter.Value));
+                }
+
+                return ReturnBaseHandler.Success(query);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<IQueryable<Recipe>>(ex.Message);
+            }
+        }
+
         public async Task<ReturnBase<Recipe>> GetRecipeByIdAsync(int recipeId)
         {
             try
             {
-                var getRecipeResult = await _recipeRepository.GetRecipeById(recipeId);
+                var getRecipeResult = await _recipeRepository.GetRecipeByIdAsync(recipeId);
 
                 if (!getRecipeResult.Succeeded)
                     return ReturnBaseHandler.Failed<Recipe>(getRecipeResult.Message);
@@ -255,11 +279,11 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<Recipe>(ex.Message);
             }
         }
-        public ReturnBase<IQueryable<Recipe>> GetRecipesForUser(int userId)
+        public ReturnBase<IQueryable<Recipe>> GetRecipesForUserAsync(int userId)
         {
             try
             {
-                var getRecipesResult = _recipeRepository.GetRecipesForUser(userId);
+                var getRecipesResult = _recipeRepository.GetRecipesForUserAsync(userId);
 
                 if (getRecipesResult.Succeeded)
                     return ReturnBaseHandler.Success(getRecipesResult.Data, "");
@@ -295,7 +319,7 @@ namespace RecipeApp.Service.Implementation
         {
             try
             {
-                ReturnBase<Recipe> getRecipeResult = await _recipeRepository.GetRecipeByIdAsNoTracking(recipe.Id);
+                ReturnBase<Recipe> getRecipeResult = await _recipeRepository.GetRecipeByIdAsNoTrackingAsync(recipe.Id);
 
                 if (!getRecipeResult.Succeeded)
                     return ReturnBaseHandler.Failed<bool>(getRecipeResult.Message);
