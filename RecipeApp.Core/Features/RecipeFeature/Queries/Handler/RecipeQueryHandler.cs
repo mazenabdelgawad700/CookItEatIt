@@ -10,7 +10,8 @@ namespace RecipeApp.Core.Features.RecipeFeature.Queries.Handler
 {
     public class RecipeQueryHandler : IRequestHandler<GetRecipeByIdQuery, ReturnBase<GetRecipeByIdResponse>>,
         IRequestHandler<GetRecipesForUserQuery, ReturnBase<PaginatedResult<GetRecipesForUserResponse>>>,
-        IRequestHandler<GetAllRecipesAsPaginatedQuery, ReturnBase<PaginatedResult<GetAllRecipesResponse>>>
+        IRequestHandler<GetAllRecipesAsPaginatedQuery, ReturnBase<PaginatedResult<GetAllRecipesResponse>>>,
+        IRequestHandler<GetTrindingNowRecipesAsPaginatedQuery, ReturnBase<PaginatedResult<GetTrindingNowRecipesResponse>>>
     {
         private readonly IRecipeService _recipeService;
         private readonly IMapper _mapper;
@@ -87,6 +88,24 @@ namespace RecipeApp.Core.Features.RecipeFeature.Queries.Handler
             catch (Exception ex)
             {
                 return ReturnBaseHandler.Failed<PaginatedResult<GetAllRecipesResponse>>(ex.Message);
+            }
+        }
+        public async Task<ReturnBase<PaginatedResult<GetTrindingNowRecipesResponse>>> Handle(GetTrindingNowRecipesAsPaginatedQuery request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var getRecipesResult = _recipeService.GetTrindingNowRecipes();
+
+                if (!getRecipesResult.Succeeded)
+                    return ReturnBaseHandler.Failed<PaginatedResult<GetTrindingNowRecipesResponse>>(getRecipesResult.Message);
+
+                var mappedResult = await _mapper.ProjectTo<GetTrindingNowRecipesResponse>(getRecipesResult.Data).ToPaginatedListAsync(request.PageNumber, request.PageSize);
+
+                return ReturnBaseHandler.Success(mappedResult, "");
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<PaginatedResult<GetTrindingNowRecipesResponse>>(ex.Message);
             }
         }
     }

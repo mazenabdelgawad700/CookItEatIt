@@ -239,7 +239,6 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<bool>(ex.Message);
             }
         }
-
         public ReturnBase<IQueryable<Recipe>> GetAllRecipes(int? filter = null)
         {
             try
@@ -262,7 +261,6 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<IQueryable<Recipe>>(ex.Message);
             }
         }
-
         public async Task<ReturnBase<Recipe>> GetRecipeByIdAsync(int recipeId)
         {
             try
@@ -288,6 +286,25 @@ namespace RecipeApp.Service.Implementation
                 if (getRecipesResult.Succeeded)
                     return ReturnBaseHandler.Success(getRecipesResult.Data, "");
                 return ReturnBaseHandler.Failed<IQueryable<Recipe>>(getRecipesResult.Message);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<IQueryable<Recipe>>(ex.Message);
+            }
+        }
+        public ReturnBase<IQueryable<Recipe>> GetTrindingNowRecipes()
+        {
+            try
+            {
+                var trendingRecipes = _recipeRepository.GetTableNoTracking()
+                    .Data
+                    .Include(r => r.Likes)
+                    .Where(r => r.CreatedAt >= DateTime.UtcNow.AddDays(-1))
+                    .OrderByDescending(r => r.Likes.Count)
+                    .Take(10)
+                    .AsQueryable();
+
+                return ReturnBaseHandler.Success(trendingRecipes);
             }
             catch (Exception ex)
             {
