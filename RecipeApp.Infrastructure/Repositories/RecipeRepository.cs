@@ -34,7 +34,7 @@ namespace RecipeApp.Infrastructure.Repositories
             }
         }
 
-        public async Task<ReturnBase<Recipe>> GetRecipeById(int recipeId)
+        public async Task<ReturnBase<Recipe>> GetRecipeByIdToDelete(int recipeId)
         {
             try
             {
@@ -43,6 +43,30 @@ namespace RecipeApp.Infrastructure.Repositories
                                             .Include(x => x.Ingredients)
                                             .Include(x => x.Instructions)
                                             .Include(x => x.Likes)
+                                            .Include(x => x.RecipeCategories)
+                                            .ThenInclude(rc => rc.Category)
+                                            .FirstOrDefaultAsync();
+
+                if (recipe is null)
+                {
+                    return ReturnBaseHandler.NotFound<Recipe>("Recipe not found");
+                }
+                return ReturnBaseHandler.Success(recipe, "");
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<Recipe>(ex.Message);
+            }
+        }
+
+        public async Task<ReturnBase<Recipe>> GetRecipeById(int recipeId)
+        {
+            try
+            {
+                Recipe? recipe = await _dbSet
+                                            .Where(x => x.Id == recipeId)
+                                            .Include(x => x.Ingredients)
+                                            .Include(x => x.Instructions)
                                             .Include(x => x.RecipeCategories)
                                             .ThenInclude(rc => rc.Category)
                                             .FirstOrDefaultAsync();

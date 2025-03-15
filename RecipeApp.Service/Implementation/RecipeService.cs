@@ -139,7 +139,7 @@ namespace RecipeApp.Service.Implementation
             var transaction = await _recipeRepository.BeginTransactionAsync();
             try
             {
-                ReturnBase<Recipe>? getRecipeResult = await _recipeRepository.GetRecipeById(recipe.Id);
+                ReturnBase<Recipe>? getRecipeResult = await _recipeRepository.GetRecipeByIdToDelete(recipe.Id);
 
                 if (!getRecipeResult.Succeeded)
                     return ReturnBaseHandler.Failed<bool>(getRecipeResult.Message);
@@ -263,6 +263,27 @@ namespace RecipeApp.Service.Implementation
             catch (Exception ex)
             {
                 return ReturnBaseHandler.Failed<IQueryable<Recipe>>(ex.Message);
+            }
+        }
+        public async Task<ReturnBase<bool>> IsCurrentUserLikedTheRecipeAsync(int userId, int recipeId)
+        {
+            try
+            {
+                var getUserResult = await _applicationUserRepository.GetByIdAsync(userId);
+
+                if (!getUserResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>("UserNotFound");
+
+                RecipeLike? isUserLikedRecipe = await _recipeLikeRepository.GetTableNoTracking().Data.Where(x => x.UserId == userId && x.RecipeId == recipeId).FirstOrDefaultAsync();
+
+                if (isUserLikedRecipe is not null)
+                    return ReturnBaseHandler.Success(true);
+
+                return ReturnBaseHandler.Failed<bool>();
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
             }
         }
         public async Task<ReturnBase<bool>> UpdateRecipeAsync(Recipe recipe)

@@ -7,5 +7,6 @@ namespace RecipeApp.Core.Features.RecipeFeature.Queries.Model
     public class GetRecipeByIdQuery : IRequest<ReturnBase<GetRecipeByIdResponse>>
     {
         public int Id { get; set; }
+        public int UserId { get; set; }
     }
 }

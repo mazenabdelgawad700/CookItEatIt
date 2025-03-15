@@ -28,10 +28,19 @@ namespace RecipeApp.Core.Features.RecipeFeature.Queries.Handler
             {
                 var getRecipeByIdResult = await _recipeService.GetRecipeByIdAsync(request.Id);
 
+
                 if (!getRecipeByIdResult.Succeeded)
                     return ReturnBaseHandler.Failed<GetRecipeByIdResponse>(getRecipeByIdResult.Message);
 
                 var mappedResult = _mapper.Map<GetRecipeByIdResponse>(getRecipeByIdResult.Data);
+
+                var checkIfCurrentUserLikedTheRecipeResult = await _recipeService.IsCurrentUserLikedTheRecipeAsync(request.UserId, mappedResult.Id);
+
+                if (checkIfCurrentUserLikedTheRecipeResult.Message.Equals("UserNotFound"))
+                    return ReturnBaseHandler.Failed<GetRecipeByIdResponse>("Invalid Token");
+
+                if (checkIfCurrentUserLikedTheRecipeResult.Succeeded)
+                    mappedResult.IsCurrentUserLiked = true;
 
                 return ReturnBaseHandler.Success(mappedResult, "");
 

@@ -17,14 +17,12 @@ namespace RecipeApp.Core.Features.RecipeFeature.Command.Handler
         private readonly IRecipeService _recipeService;
         private readonly IRecipeRepository _recipeRepository;
         private readonly IMapper _mapper;
-        private readonly IFileService _fileService;
         internal static readonly string[] allowedFileExtensions = [".jpg", ".jpeg", ".png"];
 
-        public RecipeCommandHandler(IRecipeService recipeService, IMapper mapper, IFileService fileService, IRecipeRepository recipeRepository)
+        public RecipeCommandHandler(IRecipeService recipeService, IMapper mapper, IRecipeRepository recipeRepository)
         {
             _recipeRepository = recipeRepository;
             _recipeService = recipeService;
-            _fileService = fileService;
             _mapper = mapper;
         }
 
