@@ -8,6 +8,7 @@ namespace RecipeApp.Service.Abstraction
     {
         Task<ReturnBase<int>> CreateRecipeAsync(Recipe recipe);
         Task<ReturnBase<bool>> UpdateRecipeAsync(Recipe recipe);
+        Task<ReturnBase<bool>> DeleteRecipeAsync(Recipe recipe);
         Task<ReturnBase<bool>> AddRecipeCategoriesAsync(int recipeId, List<int> categoryIds);
         Task<ReturnBase<bool>> UpdateRecipeCategoriesAsync(int recipeId, List<int> categoryIds);
         Task<ReturnBase<bool>> UpdateRecipeImageAsync(int recipeId, IFormFile imageFile, string[] allowedExtensions);

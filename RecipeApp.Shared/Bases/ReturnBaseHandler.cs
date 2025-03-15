@@ -4,7 +4,7 @@ namespace RecipeApp.Shared.Bases;
 public static class ReturnBaseHandler
 {
     #region Handle Functions
-    public static ReturnBase<T> Success<T>(T entity, string? message)
+    public static ReturnBase<T> Success<T>(T entity, string? message = null)
     {
         return new ReturnBase<T>()
         {

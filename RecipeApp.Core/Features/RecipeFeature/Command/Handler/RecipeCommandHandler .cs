@@ -11,7 +11,8 @@ namespace RecipeApp.Core.Features.RecipeFeature.Command.Handler
     public class RecipeCommandHandler : IRequestHandler<CreateRecipeCommand, ReturnBase<int>>,
          IRequestHandler<AddRecipeImageCommand, ReturnBase<bool>>,
          IRequestHandler<UpdateRecipeCommand, ReturnBase<bool>>,
-         IRequestHandler<UpdateRecipeImageCommand, ReturnBase<bool>>
+         IRequestHandler<UpdateRecipeImageCommand, ReturnBase<bool>>,
+         IRequestHandler<DeleteRecipeCommand, ReturnBase<bool>>
     {
         private readonly IRecipeService _recipeService;
         private readonly IRecipeRepository _recipeRepository;
@@ -104,6 +105,25 @@ namespace RecipeApp.Core.Features.RecipeFeature.Command.Handler
                     return ReturnBaseHandler.Failed<bool>(addRecipeImageResult.Message);
 
                 return ReturnBaseHandler.Updated<bool>(addRecipeImageResult.Message);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
+            }
+        }
+
+        public async Task<ReturnBase<bool>> Handle(DeleteRecipeCommand request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                Recipe mappedResult = _mapper.Map<Recipe>(request);
+
+                ReturnBase<bool> deleteRecipeResult = await _recipeService.DeleteRecipeAsync(mappedResult);
+
+                if (!deleteRecipeResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(deleteRecipeResult.Message);
+
+                return ReturnBaseHandler.Success(true, deleteRecipeResult.Message);
             }
             catch (Exception ex)
             {

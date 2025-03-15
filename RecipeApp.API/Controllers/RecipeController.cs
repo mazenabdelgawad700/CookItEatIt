@@ -84,6 +84,22 @@ namespace RecipeApp.API.Controllers
 
         [HttpPost]
         [Authorize]
+        public async Task<IActionResult> DeleteAsync([FromForm] DeleteRecipeCommand command)
+        {
+            string? userIdFromToken = User.FindFirst("UserId")?.Value;
+
+            if (userIdFromToken is null)
+                return Unauthorized(ReturnBaseHandler.Failed<bool>("Invalid Token"));
+
+            if (command.UserId.ToString() != userIdFromToken)
+                return Unauthorized(ReturnBaseHandler.Failed<bool>("You are not allowed to perform this action"));
+
+            var response = await Mediator.Send(command);
+            return NewResult(response);
+        }
+
+        [HttpPost]
+        [Authorize]
         public async Task<IActionResult> GetRecipesForUserAsync([FromBody] GetRecipesForUserQuery query)
         {
             string? userIdFromToken = User.FindFirst("UserId")?.Value;

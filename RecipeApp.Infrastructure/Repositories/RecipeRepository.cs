@@ -42,6 +42,7 @@ namespace RecipeApp.Infrastructure.Repositories
                                             .Where(x => x.Id == recipeId)
                                             .Include(x => x.Ingredients)
                                             .Include(x => x.Instructions)
+                                            .Include(x => x.Likes)
                                             .Include(x => x.RecipeCategories)
                                             .ThenInclude(rc => rc.Category)
                                             .FirstOrDefaultAsync();

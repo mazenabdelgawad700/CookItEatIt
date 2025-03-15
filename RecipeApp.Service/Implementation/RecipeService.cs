@@ -14,6 +14,9 @@ namespace RecipeApp.Service.Implementation
         private readonly IRecipeRepository _recipeRepository;
         private readonly IRecipeCategoryRepository _recipeCategoryRepository;
         private readonly ICategoryRepository _categoryRepository;
+        private readonly IInstructionRepository _instructionRepository;
+        private readonly IIngredientRepository _ingredientRepository;
+        private readonly IRecipeLikeRepository _recipeLikeRepository;
         private readonly IApplicationUserRepository _applicationUserRepository;
         private readonly IFileService _fileService;
         private readonly UserManager<ApplicationUser> _userManager;
@@ -21,7 +24,7 @@ namespace RecipeApp.Service.Implementation
         public RecipeService(
             IRecipeRepository recipeRepository,
             IFileService fileService, UserManager<ApplicationUser> userManager
-            , IApplicationUserRepository applicationUserRepository, IRecipeCategoryRepository recipeCategoryRepository, ICategoryRepository categoryRepository)
+            , IApplicationUserRepository applicationUserRepository, IRecipeCategoryRepository recipeCategoryRepository, ICategoryRepository categoryRepository, IInstructionRepository instructionRepository, IIngredientRepository ingredientRepository, IRecipeLikeRepository recipeLikeRepository)
         {
             _recipeRepository = recipeRepository;
             _applicationUserRepository = applicationUserRepository;
@@ -29,6 +32,9 @@ namespace RecipeApp.Service.Implementation
             _userManager = userManager;
             _recipeCategoryRepository = recipeCategoryRepository;
             _categoryRepository = categoryRepository;
+            _instructionRepository = instructionRepository;
+            _ingredientRepository = ingredientRepository;
+            _recipeLikeRepository = recipeLikeRepository;
         }
 
         public async Task<ReturnBase<bool>> AddRecipeCategoriesAsync(int recipeId, List<int> categoryIds)
@@ -128,6 +134,106 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<int>(ex.Message);
             }
         }
+        public async Task<ReturnBase<bool>> DeleteRecipeAsync(Recipe recipe)
+        {
+            var transaction = await _recipeRepository.BeginTransactionAsync();
+            try
+            {
+                ReturnBase<Recipe>? getRecipeResult = await _recipeRepository.GetRecipeById(recipe.Id);
+
+                if (!getRecipeResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(getRecipeResult.Message);
+
+                ReturnBase<ApplicationUser>? getUserResult = await _applicationUserRepository.GetByIdAsync(recipe.UserId);
+
+                if (!getUserResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(getUserResult.Message);
+
+                if (getRecipeResult.Data.Instructions.Count > 0)
+                {
+                    ReturnBase<bool> deleteRecipeInstructionsResult = await _instructionRepository.DeleteRangeAsync(getRecipeResult.Data.Instructions);
+
+                    if (!deleteRecipeInstructionsResult.Succeeded)
+                    {
+                        await transaction.RollbackAsync();
+                        return ReturnBaseHandler.Failed<bool>(deleteRecipeInstructionsResult.Message);
+                    }
+                }
+
+                if (getRecipeResult.Data.Ingredients.Count > 0)
+                {
+                    ReturnBase<bool> deleteRecipeIngredientsResult = await _ingredientRepository.DeleteRangeAsync(getRecipeResult.Data.Ingredients);
+
+                    if (!deleteRecipeIngredientsResult.Succeeded)
+                    {
+                        await transaction.RollbackAsync();
+                        return ReturnBaseHandler.Failed<bool>(deleteRecipeIngredientsResult.Message);
+                    }
+                }
+
+                if (getRecipeResult.Data.RecipeCategories.Count > 0)
+                {
+                    ReturnBase<bool> deleteRecipeCategoriesResult = await _recipeCategoryRepository.DeleteRangeAsync(getRecipeResult.Data.RecipeCategories);
+
+                    if (!deleteRecipeCategoriesResult.Succeeded)
+                    {
+                        await transaction.RollbackAsync();
+                        return ReturnBaseHandler.Failed<bool>(deleteRecipeCategoriesResult.Message);
+                    }
+                }
+
+                if (getRecipeResult.Data.LikesCount > 0)
+                {
+                    ReturnBase<bool> deleteRecipeLikesResult = await _recipeLikeRepository.DeleteRangeAsync(getRecipeResult.Data.Likes);
+
+                    if (!deleteRecipeLikesResult.Succeeded)
+                    {
+                        await transaction.RollbackAsync();
+                        return ReturnBaseHandler.Failed<bool>(deleteRecipeLikesResult.Message);
+                    }
+                }
+
+
+                ReturnBase<bool> deleteRecipeResult = await _recipeRepository.DeleteAsync(recipe.Id);
+
+                if (!deleteRecipeResult.Succeeded)
+                {
+                    await transaction.RollbackAsync();
+                    return ReturnBaseHandler.Failed<bool>(deleteRecipeResult.Message);
+                }
+
+                getUserResult.Data.RecipesCount--;
+                ReturnBase<bool> updateUserRecipesCountResult = await _applicationUserRepository.UpdateAsync(getUserResult.Data);
+
+                if (!updateUserRecipesCountResult.Succeeded)
+                {
+                    await transaction.RollbackAsync();
+                    return ReturnBaseHandler.Failed<bool>(updateUserRecipesCountResult.Message);
+                }
+
+                await transaction.CommitAsync();
+
+                // Delete the image from the server if and only if everything went well.
+                // The reason why it is here after the commit is that we can not rollback the image if anything goes wrong ^_^
+                if (!string.IsNullOrEmpty(recipe.ImgURL))
+                {
+                    int startIndex = recipe.ImgURL.LastIndexOf('\\');
+                    string pictureName = recipe.ImgURL[(startIndex + 1)..];
+
+                    ReturnBase<bool> deletePictureResult = _fileService.DeleteFile(pictureName);
+
+                    if (!deletePictureResult.Succeeded)
+                        return ReturnBaseHandler.Failed<bool>(deletePictureResult.Message);
+                }
+
+                return ReturnBaseHandler.Success(true, "Recipe Deleted Successfully");
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
+            }
+        }
         public async Task<ReturnBase<Recipe>> GetRecipeByIdAsync(int recipeId)
         {
             try
@@ -137,7 +243,7 @@ namespace RecipeApp.Service.Implementation
                 if (!getRecipeResult.Succeeded)
                     return ReturnBaseHandler.Failed<Recipe>(getRecipeResult.Message);
 
-                return ReturnBaseHandler.Success(getRecipeResult.Data, "Recipe Found Successfully");
+                return ReturnBaseHandler.Success(getRecipeResult.Data);
             }
             catch (Exception ex)
             {
