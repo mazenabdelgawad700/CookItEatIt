@@ -26,6 +26,7 @@ namespace RecipeApp.Infrastructure.Repositories
                 if (addRecipeResult is null)
                     return ReturnBaseHandler.Failed<Recipe>("Failed to add recipe");
 
+                await _dbContext.SaveChangesAsync();
                 return ReturnBaseHandler.Success(addRecipeResult.Entity, "");
             }
             catch (Exception ex)

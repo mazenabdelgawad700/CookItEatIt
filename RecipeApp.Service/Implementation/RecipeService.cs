@@ -110,16 +110,19 @@ namespace RecipeApp.Service.Implementation
 
                 if (addRecipeResult.Succeeded)
                 {
-                    ApplicationUser? recipeOwner = await _userManager.FindByIdAsync(recipe.UserId.ToString());
+                    //ApplicationUser? recipeOwner = await _userManager.FindByIdAsync(recipe.UserId.ToString());
 
-                    if (recipeOwner is null)
-                    {
-                        await transaction.RollbackAsync();
-                        return ReturnBaseHandler.Failed<int>("User not found");
-                    }
+                    //if (recipeOwner is null)
+                    //{
+                    //    await transaction.RollbackAsync();
+                    //    return ReturnBaseHandler.Failed<int>("User not found");
+                    //}
 
-                    recipeOwner.RecipesCount++;
-                    await _applicationUserRepository.SaveChangesAsync();
+                    //recipeOwner.RecipesCount += 1;
+                    //var updateRecipeOwnerResult = await _applicationUserRepository.UpdateAsync(recipeOwner);
+
+                    //if (!updateRecipeOwnerResult.Succeeded)
+                    //    return ReturnBaseHandler.Failed<int>(updateRecipeOwnerResult.Message);
 
                     await transaction.CommitAsync();
                     return ReturnBaseHandler.Success(addRecipeResult.Data.Id, "");
@@ -211,11 +214,9 @@ namespace RecipeApp.Service.Implementation
                     return ReturnBaseHandler.Failed<bool>(updateUserRecipesCountResult.Message);
                 }
 
-                await transaction.CommitAsync();
 
                 // Delete the image from the server if and only if everything went well.
-                // The reason why it is here after the commit is that we can not rollback the image if anything goes wrong ^_^
-                if (!string.IsNullOrEmpty(recipe.ImgURL))
+                if (recipe.ImgURL is not null && !recipe.ImgURL.Equals("null", StringComparison.CurrentCultureIgnoreCase))
                 {
                     int startIndex = recipe.ImgURL.LastIndexOf('\\');
                     string pictureName = recipe.ImgURL[(startIndex + 1)..];
@@ -223,9 +224,13 @@ namespace RecipeApp.Service.Implementation
                     ReturnBase<bool> deletePictureResult = _fileService.DeleteFile(pictureName);
 
                     if (!deletePictureResult.Succeeded)
+                    {
+                        await transaction.RollbackAsync();
                         return ReturnBaseHandler.Failed<bool>(deletePictureResult.Message);
+                    }
                 }
 
+                await transaction.CommitAsync();
                 return ReturnBaseHandler.Success(true, "Recipe Deleted Successfully");
             }
             catch (Exception ex)
