@@ -11,7 +11,8 @@ namespace RecipeApp.Core.Features.RecipeFeature.Queries.Handler
     public class RecipeQueryHandler : IRequestHandler<GetRecipeByIdQuery, ReturnBase<GetRecipeByIdResponse>>,
         IRequestHandler<GetRecipesForUserQuery, ReturnBase<PaginatedResult<GetRecipesForUserResponse>>>,
         IRequestHandler<GetAllRecipesAsPaginatedQuery, ReturnBase<PaginatedResult<GetAllRecipesResponse>>>,
-        IRequestHandler<GetTrindingNowRecipesAsPaginatedQuery, ReturnBase<PaginatedResult<GetTrindingNowRecipesResponse>>>
+        IRequestHandler<GetTrindingNowRecipesAsPaginatedQuery, ReturnBase<PaginatedResult<GetTrindingNowRecipesResponse>>>,
+        IRequestHandler<SearchRecipeQuery, ReturnBase<IQueryable<SearchRecipeResponse>>>
     {
         private readonly IRecipeService _recipeService;
         private readonly IMapper _mapper;
@@ -106,6 +107,25 @@ namespace RecipeApp.Core.Features.RecipeFeature.Queries.Handler
             catch (Exception ex)
             {
                 return ReturnBaseHandler.Failed<PaginatedResult<GetTrindingNowRecipesResponse>>(ex.Message);
+            }
+        }
+
+        public async Task<ReturnBase<IQueryable<SearchRecipeResponse>>> Handle(SearchRecipeQuery request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var getRecipesResult = _recipeService.GetRecipesSearchResult(request.SearchQuery);
+
+                if (!getRecipesResult.Succeeded)
+                    return ReturnBaseHandler.Failed<IQueryable<SearchRecipeResponse>>(getRecipesResult.Message);
+
+                var mappedResult = _mapper.ProjectTo<SearchRecipeResponse>(getRecipesResult.Data);
+
+                return ReturnBaseHandler.Success(mappedResult, "");
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<IQueryable<SearchRecipeResponse>>(ex.Message);
             }
         }
     }

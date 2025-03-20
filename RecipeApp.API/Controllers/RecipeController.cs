@@ -127,5 +127,13 @@ namespace RecipeApp.API.Controllers
             var response = await Mediator.Send(query);
             return NewResult(response);
         }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> SearchAsync([FromQuery] SearchRecipeQuery query)
+        {
+            var response = await Mediator.Send(query);
+            return NewResult(response);
+        }
     }
 }

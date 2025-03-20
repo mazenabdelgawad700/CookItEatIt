@@ -292,6 +292,26 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<IQueryable<Recipe>>(ex.Message);
             }
         }
+
+        public ReturnBase<IQueryable<Recipe>> GetRecipesSearchResult(string? searchQuery = null)
+        {
+            try
+            {
+                if (searchQuery is null)
+                    return ReturnBaseHandler.BadRequest<IQueryable<Recipe>>("Invalid search Query");
+
+                var trendingRecipes = _recipeRepository.GetTableNoTracking()
+                    .Data
+                    .Where(x => x.RecipeName.Contains(searchQuery));
+
+                return ReturnBaseHandler.Success(trendingRecipes);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<IQueryable<Recipe>>(ex.Message);
+            }
+        }
+
         public ReturnBase<IQueryable<Recipe>> GetTrindingNowRecipes()
         {
             try
@@ -301,8 +321,7 @@ namespace RecipeApp.Service.Implementation
                     .Include(r => r.Likes)
                     .Where(r => r.CreatedAt >= DateTime.UtcNow.AddDays(-1))
                     .OrderByDescending(r => r.Likes.Count)
-                    .Take(10)
-                    .AsQueryable();
+                    .Take(10);
 
                 return ReturnBaseHandler.Success(trendingRecipes);
             }
