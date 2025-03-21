@@ -351,6 +351,59 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<bool>(ex.Message);
             }
         }
+
+        public async Task<ReturnBase<bool>> ToggleRecipeLikeAsync(int recipeId, int userId)
+        {
+            try
+            {
+                ReturnBase<ApplicationUser>? getUserResult = await _applicationUserRepository.GetByIdAsync(userId);
+
+                if (getUserResult.Data is null)
+                    return ReturnBaseHandler.Failed<bool>(getUserResult.Message);
+
+                ReturnBase<Recipe>? getRecipeResult = await _recipeRepository.GetByIdAsync(recipeId);
+
+                if (getRecipeResult.Data is null)
+                    return ReturnBaseHandler.Failed<bool>(getRecipeResult.Message);
+
+                RecipeLike? userLikeRecipeResult = await _recipeLikeRepository.GetTableNoTracking().Data.FirstOrDefaultAsync(x => x.UserId == userId && x.RecipeId == recipeId);
+
+                if (userLikeRecipeResult is null)
+                {
+                    RecipeLike recipeLike = new()
+                    {
+                        UserId = userId,
+                        RecipeId = recipeId,
+                        LikedAt = DateTime.UtcNow
+                    };
+                    ReturnBase<bool> addLikeResult = await _recipeLikeRepository.AddAsync(recipeLike);
+
+                    if (!addLikeResult.Succeeded)
+                        return ReturnBaseHandler.Failed<bool>(addLikeResult.Message);
+
+                    getRecipeResult.Data.LikesCount++;
+                    await _recipeRepository.SaveChangesAsync();
+
+                    return ReturnBaseHandler.Success(true);
+                }
+
+
+                ReturnBase<bool> removeLikeResult = await _recipeLikeRepository.RemoveLikeFromRecipe(userLikeRecipeResult);
+
+                if (!removeLikeResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(removeLikeResult.Message);
+
+                getRecipeResult.Data.LikesCount--;
+                await _recipeRepository.SaveChangesAsync();
+                return ReturnBaseHandler.Success(true);
+            }
+            catch (Exception ex)
+
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
+            }
+        }
+
         public async Task<ReturnBase<bool>> UpdateRecipeAsync(Recipe recipe)
         {
             try
