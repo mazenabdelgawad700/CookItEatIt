@@ -292,7 +292,6 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<IQueryable<Recipe>>(ex.Message);
             }
         }
-
         public ReturnBase<IQueryable<Recipe>> GetRecipesSearchResult(string? searchQuery = null)
         {
             try
@@ -311,7 +310,6 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<IQueryable<Recipe>>(ex.Message);
             }
         }
-
         public ReturnBase<IQueryable<Recipe>> GetTrindingNowRecipes()
         {
             try
@@ -351,7 +349,6 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<bool>(ex.Message);
             }
         }
-
         public async Task<ReturnBase<bool>> ToggleRecipeLikeAsync(int recipeId, int userId)
         {
             try
@@ -403,7 +400,6 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<bool>(ex.Message);
             }
         }
-
         public async Task<ReturnBase<bool>> UpdateRecipeAsync(Recipe recipe)
         {
             try
