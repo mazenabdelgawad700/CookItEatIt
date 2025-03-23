@@ -12,6 +12,7 @@ namespace RecipeApp.Service.Implementation
     public class RecipeService : IRecipeService
     {
         private readonly IRecipeRepository _recipeRepository;
+        private readonly ISavedRecipeRepository _savedRecipeRepository;
         private readonly IRecipeCategoryRepository _recipeCategoryRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IInstructionRepository _instructionRepository;
@@ -24,7 +25,7 @@ namespace RecipeApp.Service.Implementation
         public RecipeService(
             IRecipeRepository recipeRepository,
             IFileService fileService, UserManager<ApplicationUser> userManager
-            , IApplicationUserRepository applicationUserRepository, IRecipeCategoryRepository recipeCategoryRepository, ICategoryRepository categoryRepository, IInstructionRepository instructionRepository, IIngredientRepository ingredientRepository, IRecipeLikeRepository recipeLikeRepository)
+            , IApplicationUserRepository applicationUserRepository, IRecipeCategoryRepository recipeCategoryRepository, ICategoryRepository categoryRepository, IInstructionRepository instructionRepository, IIngredientRepository ingredientRepository, IRecipeLikeRepository recipeLikeRepository, ISavedRecipeRepository savedRecipeRepository)
         {
             _recipeRepository = recipeRepository;
             _applicationUserRepository = applicationUserRepository;
@@ -35,6 +36,7 @@ namespace RecipeApp.Service.Implementation
             _instructionRepository = instructionRepository;
             _ingredientRepository = ingredientRepository;
             _recipeLikeRepository = recipeLikeRepository;
+            _savedRecipeRepository = savedRecipeRepository;
         }
 
         public async Task<ReturnBase<bool>> AddRecipeCategoriesAsync(int recipeId, List<int> categoryIds)
@@ -385,7 +387,7 @@ namespace RecipeApp.Service.Implementation
                 }
 
 
-                ReturnBase<bool> removeLikeResult = await _recipeLikeRepository.RemoveLikeFromRecipe(userLikeRecipeResult);
+                ReturnBase<bool> removeLikeResult = await _recipeLikeRepository.RemoveLikeFromRecipeAsync(userLikeRecipeResult);
 
                 if (!removeLikeResult.Succeeded)
                     return ReturnBaseHandler.Failed<bool>(removeLikeResult.Message);
@@ -396,6 +398,50 @@ namespace RecipeApp.Service.Implementation
             }
             catch (Exception ex)
 
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
+            }
+        }
+        public async Task<ReturnBase<bool>> ToggleSavedRecipeAsync(int recipeId, int userId)
+        {
+            try
+            {
+                ReturnBase<ApplicationUser>? getUserResult = await _applicationUserRepository.GetByIdAsync(userId);
+
+                if (!getUserResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(getUserResult.Message);
+
+                ReturnBase<Recipe>? getRecipeResult = await _recipeRepository.GetByIdAsync(recipeId);
+
+                if (!getRecipeResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(getRecipeResult.Message);
+
+
+                SavedRecipe? savedRecipeResult = await _savedRecipeRepository.GetTableNoTracking().Data.Where(x => x.UserId == userId && x.RecipeId == recipeId).FirstOrDefaultAsync();
+
+                if (savedRecipeResult is null)
+                {
+                    SavedRecipe savedRecipe = new()
+                    {
+                        UserId = userId,
+                        RecipeId = recipeId
+                    };
+                    ReturnBase<bool> saveRecipeToDbResult = await _savedRecipeRepository.AddAsync(savedRecipe);
+
+                    if (!saveRecipeToDbResult.Succeeded)
+                        return ReturnBaseHandler.Failed<bool>(saveRecipeToDbResult.Message);
+
+                    return ReturnBaseHandler.Success(true, "Recipe Saved Successfully");
+                }
+
+                ReturnBase<bool> removeSavedRecipeResult = await _savedRecipeRepository.RemoveSavedRecipeAsync(savedRecipeResult);
+
+                if (!removeSavedRecipeResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(removeSavedRecipeResult.Message);
+
+                return ReturnBaseHandler.Success(true, "Recipe Removed Successfully");
+            }
+            catch (Exception ex)
             {
                 return ReturnBaseHandler.Failed<bool>(ex.Message);
             }

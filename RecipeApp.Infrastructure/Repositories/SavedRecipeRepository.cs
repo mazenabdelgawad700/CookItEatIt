@@ -7,22 +7,21 @@ using RecipeApp.Shared.Bases;
 
 namespace RecipeApp.Infrastructure.Repositories
 {
-    internal class RecipeLikeRepository : GenericRepositoryAsync<RecipeLike>, IRecipeLikeRepository
+    internal class SavedRecipeRepository : GenericRepositoryAsync<SavedRecipe>, ISavedRecipeRepository
     {
-        private readonly DbSet<RecipeLike> _dbSet;
         private readonly AppDbContext _dbContext;
-
-        public RecipeLikeRepository(AppDbContext dbContext) : base(dbContext)
+        private readonly DbSet<SavedRecipe> _dbSet;
+        public SavedRecipeRepository(AppDbContext dbContext) : base(dbContext)
         {
             _dbContext = dbContext;
-            _dbSet = dbContext.Set<RecipeLike>();
+            _dbSet = dbContext.Set<SavedRecipe>();
         }
 
-        public async Task<ReturnBase<bool>> RemoveLikeFromRecipeAsync(RecipeLike recipeLike)
+        public async Task<ReturnBase<bool>> RemoveSavedRecipeAsync(SavedRecipe savedRecipe)
         {
             try
             {
-                _dbSet.Remove(recipeLike);
+                _dbSet.Remove(savedRecipe);
                 await _dbContext.SaveChangesAsync();
                 return ReturnBaseHandler.Success(true);
             }

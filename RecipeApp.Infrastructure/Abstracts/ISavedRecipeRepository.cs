@@ -4,8 +4,8 @@ using RecipeApp.Shared.Bases;
 
 namespace RecipeApp.Infrastructure.Abstracts
 {
-    public interface IRecipeLikeRepository : IGenericRepositoryAsync<RecipeLike>
+    public interface ISavedRecipeRepository : IGenericRepositoryAsync<SavedRecipe>
     {
-        public Task<ReturnBase<bool>> RemoveLikeFromRecipeAsync(RecipeLike recipeLike);
+        public Task<ReturnBase<bool>> RemoveSavedRecipeAsync(SavedRecipe savedRecipe);
     }
 }

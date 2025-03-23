@@ -100,7 +100,23 @@ namespace RecipeApp.API.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> TogglieLikeAsync([FromBody] ToggleRecipeLikeCommand command)
+        public async Task<IActionResult> ToggleLikeAsync([FromBody] ToggleRecipeLikeCommand command)
+        {
+            string? userIdFromToken = User.FindFirst("UserId")?.Value;
+
+            if (userIdFromToken is null)
+                return Unauthorized(ReturnBaseHandler.Failed<bool>("Invalid Token"));
+
+            if (command.UserId.ToString() != userIdFromToken)
+                return Unauthorized(ReturnBaseHandler.Failed<bool>("You are not allowed to perform this action"));
+
+            ReturnBase<bool> response = await Mediator.Send(command);
+            return NewResult(response);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> ToggleSavedRecipeAsync([FromBody] SaveRecipeCommand command)
         {
             string? userIdFromToken = User.FindFirst("UserId")?.Value;
 

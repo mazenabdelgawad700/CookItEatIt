@@ -13,7 +13,8 @@ namespace RecipeApp.Core.Features.RecipeFeature.Command.Handler
          IRequestHandler<UpdateRecipeCommand, ReturnBase<bool>>,
          IRequestHandler<UpdateRecipeImageCommand, ReturnBase<bool>>,
          IRequestHandler<DeleteRecipeCommand, ReturnBase<bool>>,
-         IRequestHandler<ToggleRecipeLikeCommand, ReturnBase<bool>>
+         IRequestHandler<ToggleRecipeLikeCommand, ReturnBase<bool>>,
+         IRequestHandler<SaveRecipeCommand, ReturnBase<bool>>
     {
         private readonly IRecipeService _recipeService;
         private readonly IRecipeRepository _recipeRepository;
@@ -140,6 +141,23 @@ namespace RecipeApp.Core.Features.RecipeFeature.Command.Handler
                     return ReturnBaseHandler.Failed<bool>(toggleRecipLikeResult.Message);
 
                 return ReturnBaseHandler.Success(true, toggleRecipLikeResult.Message);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
+            };
+        }
+
+        public async Task<ReturnBase<bool>> Handle(SaveRecipeCommand request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                ReturnBase<bool> toggleSavedRecipeResult = await _recipeService.ToggleSavedRecipeAsync(request.RecipeId, request.UserId);
+
+                if (!toggleSavedRecipeResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(toggleSavedRecipeResult.Message);
+
+                return ReturnBaseHandler.Success(true, toggleSavedRecipeResult.Message);
             }
             catch (Exception ex)
             {

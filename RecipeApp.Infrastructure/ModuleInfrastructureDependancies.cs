@@ -22,6 +22,7 @@ public static class ModuleInfrastructureDependencies
         services.AddTransient<IInstructionRepository, InstructionRepository>();
         services.AddTransient<IRecipeCategoryRepository, RecipeCategoryRepository>();
         services.AddTransient<IRecipeLikeRepository, RecipeLikeRepository>();
+        services.AddTransient<ISavedRecipeRepository, SavedRecipeRepository>();
 
         services.AddTransient(typeof(IGenericRepositoryAsync<>), typeof(GenericRepositoryAsync<>));
 
