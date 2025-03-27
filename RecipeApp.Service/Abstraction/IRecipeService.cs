@@ -19,6 +19,7 @@ namespace RecipeApp.Service.Abstraction
         Task<ReturnBase<Recipe>> GetRecipeByIdAsync(int recipeId);
         /* ****************** Not Async ****************** */
         ReturnBase<IQueryable<Recipe>> GetRecipesForUserAsync(int userId);
+        ReturnBase<IQueryable<SavedRecipe>> GetSavedRecipesForUserAsync(int userId, int? filter = null);
         ReturnBase<IQueryable<Recipe>> GetAllRecipes(int? filter = null);
         ReturnBase<IQueryable<Recipe>> GetTrindingNowRecipes();
         ReturnBase<IQueryable<Recipe>> GetRecipesSearchResult(string? searchQuery = null);

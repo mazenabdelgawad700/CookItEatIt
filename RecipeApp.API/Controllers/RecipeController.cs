@@ -162,6 +162,22 @@ namespace RecipeApp.API.Controllers
 
         [HttpPost]
         [Authorize]
+        public async Task<IActionResult> GetSavedRecipesAsync([FromBody] GetSavedRecipesAsPaginatedQuery query)
+        {
+            string? userIdFromToken = User.FindFirst("UserId")?.Value;
+
+            if (userIdFromToken is null)
+                return Unauthorized(ReturnBaseHandler.Failed<bool>("Invalid Token"));
+
+            if (query.UserId.ToString() != userIdFromToken)
+                return Unauthorized(ReturnBaseHandler.Failed<bool>("You are not allowed to perform this action"));
+
+            var response = await Mediator.Send(query);
+            return NewResult(response);
+        }
+
+        [HttpPost]
+        [Authorize]
         public async Task<IActionResult> SearchAsync([FromQuery] SearchRecipeQuery query)
         {
             var response = await Mediator.Send(query);

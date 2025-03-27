@@ -312,6 +312,30 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<IQueryable<Recipe>>(ex.Message);
             }
         }
+        public ReturnBase<IQueryable<SavedRecipe>> GetSavedRecipesForUserAsync(int userId, int? filter = null)
+        {
+            try
+            {
+                var query = _savedRecipeRepository.GetTableNoTracking()
+                    .Data
+                    .Include(x => x.User)
+                    .Include(x => x.Recipe)
+                        .ThenInclude(r => r.RecipeCategories)
+                    .Where(x => x.UserId == userId)
+                    .AsQueryable();
+
+                if (filter.HasValue)
+                {
+                    query = query.Where(x => x.Recipe.RecipeCategories.Any(rc => rc.CategoryId == filter.Value));
+                }
+
+                return ReturnBaseHandler.Success(query);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<IQueryable<SavedRecipe>>(ex.Message);
+            }
+        }
         public ReturnBase<IQueryable<Recipe>> GetTrindingNowRecipes()
         {
             try
