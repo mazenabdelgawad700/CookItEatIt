@@ -2,6 +2,7 @@
 using RecipeApp.Infrastructure.Abstracts;
 using RecipeApp.Infrastructure.InfrastructureBases;
 using RecipeApp.Infrastructure.Repositories;
+using RecipeApp.Infrastructure.Repositories.UserFollowerRepository;
 
 namespace RecipeApp.Infrastructure;
 
@@ -23,6 +24,7 @@ public static class ModuleInfrastructureDependencies
         services.AddTransient<IRecipeCategoryRepository, RecipeCategoryRepository>();
         services.AddTransient<IRecipeLikeRepository, RecipeLikeRepository>();
         services.AddTransient<ISavedRecipeRepository, SavedRecipeRepository>();
+        services.AddTransient<IUserFollowerRepository, UserFollowerRepository>();
 
         services.AddTransient(typeof(IGenericRepositoryAsync<>), typeof(GenericRepositoryAsync<>));
 
