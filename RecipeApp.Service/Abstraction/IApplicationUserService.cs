@@ -9,5 +9,7 @@ namespace RecipeApp.Service.Abstraction
         Task<ReturnBase<bool>> UpdateApplicationUserAsync(ApplicationUser user);
         Task<ReturnBase<bool>> IsCountryValidAsync(int? countryId);
         Task<ReturnBase<bool>> ToggleUserFollowAsync(int followerId, int followingId);
+        Task<ReturnBase<bool>> VerifyChefAsync(ApplicationUser user);
+        ReturnBase<IQueryable<ApplicationUser>> VerifiedChefList();
     }
 }

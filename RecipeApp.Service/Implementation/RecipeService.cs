@@ -20,12 +20,13 @@ namespace RecipeApp.Service.Implementation
         private readonly IRecipeLikeRepository _recipeLikeRepository;
         private readonly IApplicationUserRepository _applicationUserRepository;
         private readonly IFileService _fileService;
+        private readonly IApplicationUserService _applicationUserService;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public RecipeService(
             IRecipeRepository recipeRepository,
             IFileService fileService, UserManager<ApplicationUser> userManager
-            , IApplicationUserRepository applicationUserRepository, IRecipeCategoryRepository recipeCategoryRepository, ICategoryRepository categoryRepository, IInstructionRepository instructionRepository, IIngredientRepository ingredientRepository, IRecipeLikeRepository recipeLikeRepository, ISavedRecipeRepository savedRecipeRepository)
+            , IApplicationUserRepository applicationUserRepository, IRecipeCategoryRepository recipeCategoryRepository, ICategoryRepository categoryRepository, IInstructionRepository instructionRepository, IIngredientRepository ingredientRepository, IRecipeLikeRepository recipeLikeRepository, ISavedRecipeRepository savedRecipeRepository, IApplicationUserService applicationUserService)
         {
             _recipeRepository = recipeRepository;
             _applicationUserRepository = applicationUserRepository;
@@ -37,6 +38,7 @@ namespace RecipeApp.Service.Implementation
             _ingredientRepository = ingredientRepository;
             _recipeLikeRepository = recipeLikeRepository;
             _savedRecipeRepository = savedRecipeRepository;
+            _applicationUserService = applicationUserService;
         }
 
         public async Task<ReturnBase<bool>> AddRecipeCategoriesAsync(int recipeId, List<int> categoryIds)
@@ -112,19 +114,21 @@ namespace RecipeApp.Service.Implementation
 
                 if (addRecipeResult.Succeeded)
                 {
-                    //ApplicationUser? recipeOwner = await _userManager.FindByIdAsync(recipe.UserId.ToString());
+                    ApplicationUser? recipeOwner = await _userManager.FindByIdAsync(recipe.UserId.ToString());
 
-                    //if (recipeOwner is null)
-                    //{
-                    //    await transaction.RollbackAsync();
-                    //    return ReturnBaseHandler.Failed<int>("User not found");
-                    //}
+                    if (recipeOwner is null)
+                    {
+                        await transaction.RollbackAsync();
+                        return ReturnBaseHandler.Failed<int>("User not found");
+                    }
 
-                    //recipeOwner.RecipesCount += 1;
-                    //var updateRecipeOwnerResult = await _applicationUserRepository.UpdateAsync(recipeOwner);
+                    var verifyChefResult = await _applicationUserService.VerifyChefAsync(recipeOwner);
 
-                    //if (!updateRecipeOwnerResult.Succeeded)
-                    //    return ReturnBaseHandler.Failed<int>(updateRecipeOwnerResult.Message);
+                    if (!verifyChefResult.Succeeded)
+                    {
+                        await transaction.RollbackAsync();
+                        return ReturnBaseHandler.Failed<int>(verifyChefResult.Message);
+                    }
 
                     await transaction.CommitAsync();
                     return ReturnBaseHandler.Success(addRecipeResult.Data.Id, "");

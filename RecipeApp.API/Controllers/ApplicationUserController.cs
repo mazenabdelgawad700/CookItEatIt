@@ -4,6 +4,7 @@ using RecipeApp.API.Base;
 using RecipeApp.Core.Features.ApplicationUserFeature.Command.Model;
 using RecipeApp.Core.Features.ApplicationUserFeature.Query.Model;
 using RecipeApp.Core.Features.ApplicationUserFeature.Query.Response;
+using RecipeApp.Core.Features.VerifiedChefFeature.Query.Model;
 using RecipeApp.Shared.Bases;
 using System.Net;
 
@@ -88,6 +89,14 @@ namespace RecipeApp.API.Controllers
                 return Unauthorized(ReturnBaseHandler.Failed<bool>("You are not allowed to perform this action"));
 
             ReturnBase<bool> response = await Mediator.Send(command);
+            return NewResult(response);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> GetVerifiedChefsAsync([FromBody] VerifiedChefAsPaginatedQuery query)
+        {
+            var response = await Mediator.Send(query);
             return NewResult(response);
         }
     }

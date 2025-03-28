@@ -61,9 +61,9 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<bool>(ex.Message);
             }
         }
-
         public async Task<ReturnBase<bool>> ToggleUserFollowAsync(int followerId, int followingId)
         {
+            var transaction = await _applicationUserRepository.BeginTransactionAsync();
             try
             {
                 ReturnBase<ApplicationUser> follower = await _applicationUserRepository.GetByIdAsync(followerId);
@@ -117,14 +117,23 @@ namespace RecipeApp.Service.Implementation
                 await _applicationUserRepository.UpdateAsync(follower.Data);
                 await _applicationUserRepository.UpdateAsync(following.Data);
 
+                var verifyChefResult = await VerifyChefAsync(following.Data);
+
+                if (!verifyChefResult.Succeeded)
+                {
+                    await transaction.RollbackAsync();
+                    return ReturnBaseHandler.Failed<bool>(verifyChefResult.Message);
+                }
+
+                await transaction.CommitAsync();
                 return ReturnBaseHandler.Success(true, "");
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
                 return ReturnBaseHandler.Failed<bool>(ex.Message);
             }
         }
-
         public async Task<ReturnBase<bool>> UpdateApplicationUserAsync(ApplicationUser user)
         {
             try
@@ -135,6 +144,51 @@ namespace RecipeApp.Service.Implementation
                     return ReturnBaseHandler.Success(true, "");
 
                 return ReturnBaseHandler.Failed<bool>(updateResult.Message);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
+            }
+        }
+        public ReturnBase<IQueryable<ApplicationUser>> VerifiedChefList()
+        {
+            try
+            {
+                var verifiedchefs = _applicationUserRepository.GetTableNoTracking().Data.Where(x => x.IsVerifiedChef);
+
+                if (verifiedchefs is null)
+                    return ReturnBaseHandler.Failed<IQueryable<ApplicationUser>>();
+
+                if (!verifiedchefs.Any())
+                    return ReturnBaseHandler.Success(verifiedchefs, "No Verified Chef Found");
+
+                return ReturnBaseHandler.Success(verifiedchefs);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<IQueryable<ApplicationUser>>(ex.Message);
+            }
+        }
+        public async Task<ReturnBase<bool>> VerifyChefAsync(ApplicationUser user)
+        {
+            try
+            {
+
+                if (user is null)
+                    return ReturnBaseHandler.Failed<bool>("User Not Found");
+
+                if (!user.IsVerifiedChef)
+                {
+                    if (user.EmailConfirmed && user.FollowersCount >= 10000 && user.RecipesCount >= 200)
+                    {
+                        user.IsVerifiedChef = true;
+                        var updateUserResult = await _applicationUserRepository.UpdateAsync(user);
+
+                        if (!updateUserResult.Succeeded)
+                            return ReturnBaseHandler.Failed<bool>(updateUserResult.Message);
+                    }
+                }
+                return ReturnBaseHandler.Success(true);
             }
             catch (Exception ex)
             {
