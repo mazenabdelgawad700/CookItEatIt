@@ -18,14 +18,16 @@ namespace RecipeApp.Service.Implementation
         private readonly IApplicationUserRepository _applicationUserRepository;
         private readonly IUserFollowerRepository _userFollowerRepository;
         private readonly IUserPreferencesService _userPreferencesService;
+        private readonly IUserPreferencesRepository _userPreferencesRepository;
 
-        public ApplicationUserService(UserManager<ApplicationUser> userManager, IApplicationUserRepository applicationUserRepository, AppDbContext dbContext, IUserFollowerRepository userFollowerRepository, IUserPreferencesService userPreferencesService)
+        public ApplicationUserService(UserManager<ApplicationUser> userManager, IApplicationUserRepository applicationUserRepository, AppDbContext dbContext, IUserFollowerRepository userFollowerRepository, IUserPreferencesService userPreferencesService, IUserPreferencesRepository userPreferencesRepository)
         {
             _userManager = userManager;
             _applicationUserRepository = applicationUserRepository;
             _dbContext = dbContext;
             _userFollowerRepository = userFollowerRepository;
             _userPreferencesService = userPreferencesService;
+            _userPreferencesRepository = userPreferencesRepository;
         }
 
         public async Task<ReturnBase<ApplicationUser>> GetApplicationUserProfileByIdAsync(int userId)
@@ -53,15 +55,15 @@ namespace RecipeApp.Service.Implementation
                 if (!getUserResult.Succeeded)
                     return ReturnBaseHandler.Failed<GetUserSettingsResponse>(getUserResult.Message);
 
-                var acceptNewDishNotificationResult = await _userPreferencesService.GetUserPreferencesByUserIdAsync(userId);
+                var getUserPreferencesResult = await _userPreferencesService.GetUserPreferencesByUserIdAsync(userId);
 
-                if (!acceptNewDishNotificationResult.Succeeded)
-                    return ReturnBaseHandler.Failed<GetUserSettingsResponse>(acceptNewDishNotificationResult.Message);
+                if (!getUserPreferencesResult.Succeeded)
+                    return ReturnBaseHandler.Failed<GetUserSettingsResponse>(getUserPreferencesResult.Message);
 
                 var response = new GetUserSettingsResponse()
                 {
                     PreferredTheme = getUserResult.Data.PreferredTheme,
-                    AcceptNewDishNotification = acceptNewDishNotificationResult.Data.AcceptNewDishNotification
+                    AcceptNewDishNotification = getUserPreferencesResult.Data.AcceptNewDishNotification
                 };
 
                 return ReturnBaseHandler.Success(response);
@@ -179,6 +181,54 @@ namespace RecipeApp.Service.Implementation
                 return ReturnBaseHandler.Failed<bool>(ex.Message);
             }
         }
+        public async Task<ReturnBase<bool>> UpdateApplicationUserSettingsAsync(UpdateApplicationUserSettingsCommandShared newUserSettings)
+        {
+            var transaction = await _applicationUserRepository.BeginTransactionAsync();
+            try
+            {
+                var getUserResult = await GetApplicationUserProfileByIdAsync(newUserSettings.Id);
+                if (!getUserResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(getUserResult.Message);
+
+                var getUserPreferencesResult = await _userPreferencesService.GetUserPreferencesByUserIdAsync(newUserSettings.Id);
+
+                if (!getUserPreferencesResult.Succeeded)
+                    return ReturnBaseHandler.Failed<bool>(getUserPreferencesResult.Message);
+
+                getUserResult.Data.PreferredTheme = newUserSettings.PreferredTheme;
+
+                getUserPreferencesResult.Data.AcceptNewDishNotification = newUserSettings.AcceptNewDishNotification;
+
+                var updateUserPreferredTheme = await _applicationUserRepository.UpdateAsync(getUserResult.Data);
+
+                if (!updateUserPreferredTheme.Succeeded)
+                {
+                    await transaction.RollbackAsync();
+                    return ReturnBaseHandler.Failed<bool>(updateUserPreferredTheme.Message);
+                }
+
+                var updateUserPreferences = await _userPreferencesRepository.UpdateAsync(getUserPreferencesResult.Data);
+                if (!updateUserPreferences.Succeeded)
+                {
+                    await transaction.RollbackAsync();
+                    return ReturnBaseHandler.Failed<bool>(updateUserPreferences.Message);
+                }
+
+                await transaction.CommitAsync();
+                return ReturnBaseHandler.Success(true);
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return ReturnBaseHandler.Failed<bool>(ex.Message);
+            }
+        }
+
+        public Task<ReturnBase<GetUserSettingsResponse>> UpdateApplicationUserSettingsAsync(int userId)
+        {
+            throw new NotImplementedException();
+        }
+
         public ReturnBase<IQueryable<ApplicationUser>> VerifiedChefList()
         {
             try
