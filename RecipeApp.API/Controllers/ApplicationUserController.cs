@@ -4,6 +4,7 @@ using RecipeApp.API.Base;
 using RecipeApp.Core.Features.ApplicationUserFeature.Command.Model;
 using RecipeApp.Core.Features.ApplicationUserFeature.Query.Model;
 using RecipeApp.Core.Features.ApplicationUserFeature.Query.Response;
+using RecipeApp.Core.Features.ApplicationUserSettingsFeature.Query.Model;
 using RecipeApp.Core.Features.VerifiedChefFeature.Query.Model;
 using RecipeApp.Shared.Bases;
 using System.Net;
@@ -18,6 +19,22 @@ namespace RecipeApp.API.Controllers
         public async Task<IActionResult> GetUserProfileByIdAsync([FromBody] GetApplicationUserProfileByIdQuery query)
         {
             ReturnBase<GetApplicationUserProfileByIdResponse> response = await Mediator.Send(query);
+            return NewResult(response);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> GetUserSettingsAsync([FromBody] GetUserSettingsQuery query)
+        {
+            string? userIdFromToken = User.FindFirst("UserId")?.Value;
+
+            if (userIdFromToken is null)
+                return Unauthorized(ReturnBaseHandler.Failed<bool>("Invalid Token"));
+
+            if (query.Id.ToString() != userIdFromToken)
+                return Unauthorized(ReturnBaseHandler.Failed<bool>("You are not allowed to perform this action"));
+
+            var response = await Mediator.Send(query);
             return NewResult(response);
         }
 

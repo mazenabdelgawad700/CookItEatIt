@@ -6,6 +6,7 @@ using RecipeApp.Infrastructure.Abstracts;
 using RecipeApp.Infrastructure.Context;
 using RecipeApp.Service.Abstraction;
 using RecipeApp.Shared.Bases;
+using RecipeApp.Shared.SharedResponse;
 
 namespace RecipeApp.Service.Implementation
 {
@@ -16,13 +17,15 @@ namespace RecipeApp.Service.Implementation
         private readonly AppDbContext _dbContext;
         private readonly IApplicationUserRepository _applicationUserRepository;
         private readonly IUserFollowerRepository _userFollowerRepository;
+        private readonly IUserPreferencesService _userPreferencesService;
 
-        public ApplicationUserService(UserManager<ApplicationUser> userManager, IApplicationUserRepository applicationUserRepository, AppDbContext dbContext, IUserFollowerRepository userFollowerRepository)
+        public ApplicationUserService(UserManager<ApplicationUser> userManager, IApplicationUserRepository applicationUserRepository, AppDbContext dbContext, IUserFollowerRepository userFollowerRepository, IUserPreferencesService userPreferencesService)
         {
             _userManager = userManager;
             _applicationUserRepository = applicationUserRepository;
             _dbContext = dbContext;
             _userFollowerRepository = userFollowerRepository;
+            _userPreferencesService = userPreferencesService;
         }
 
         public async Task<ReturnBase<ApplicationUser>> GetApplicationUserProfileByIdAsync(int userId)
@@ -40,6 +43,32 @@ namespace RecipeApp.Service.Implementation
             catch (Exception ex)
             {
                 return ReturnBaseHandler.Failed<ApplicationUser>(ex.Message);
+            }
+        }
+        public async Task<ReturnBase<GetUserSettingsResponse>> GetApplicationUserSettingsAsync(int userId)
+        {
+            try
+            {
+                var getUserResult = await GetApplicationUserProfileByIdAsync(userId);
+                if (!getUserResult.Succeeded)
+                    return ReturnBaseHandler.Failed<GetUserSettingsResponse>(getUserResult.Message);
+
+                var acceptNewDishNotificationResult = await _userPreferencesService.GetUserPreferencesByUserIdAsync(userId);
+
+                if (!acceptNewDishNotificationResult.Succeeded)
+                    return ReturnBaseHandler.Failed<GetUserSettingsResponse>(acceptNewDishNotificationResult.Message);
+
+                var response = new GetUserSettingsResponse()
+                {
+                    PreferredTheme = getUserResult.Data.PreferredTheme,
+                    AcceptNewDishNotification = acceptNewDishNotificationResult.Data.AcceptNewDishNotification
+                };
+
+                return ReturnBaseHandler.Success(response);
+            }
+            catch (Exception ex)
+            {
+                return ReturnBaseHandler.Failed<GetUserSettingsResponse>(ex.Message);
             }
         }
         public async Task<ReturnBase<bool>> IsCountryValidAsync(int? countryId)

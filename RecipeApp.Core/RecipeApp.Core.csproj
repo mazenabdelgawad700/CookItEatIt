@@ -24,6 +24,10 @@
 
   <ItemGroup>
     <Folder Include="Features\ApplicationUserFeature\Command\Validator\" />
+    <Folder Include="Features\ApplicationUserSettingsFeature\Command\Handler\" />
+    <Folder Include="Features\ApplicationUserSettingsFeature\Command\Model\" />
+    <Folder Include="Features\ApplicationUserSettingsFeature\Command\Validators\" />
+    <Folder Include="Features\ApplicationUserSettingsFeature\Query\Response\" />
     <Folder Include="Features\Authentication\Query\" />
     <Folder Include="Features\PreferredDishFeature\Queries\Handler\" />
     <Folder Include="Features\PreferredDishFeature\Queries\Model\" />
