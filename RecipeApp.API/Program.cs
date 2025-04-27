@@ -73,21 +73,21 @@ public class Program
             await RoleSeeder.SeedRolesAsync(roleManager);
         }
 
-        if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI();
-        }
+        //if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
+        //{
+        app.UseSwagger();
+        app.UseSwaggerUI();
+        //}
 
         app.UseMiddleware<ErrorHandlerMiddleware>();
 
         app.UseStaticFiles(new StaticFileOptions
         {
             FileProvider = new PhysicalFileProvider(
-                 Path.Combine(builder.Configuration.GetSection("ProfilePicturesPath").Value!,
-                 builder.Configuration.GetSection("ProfilePicturesFolderName").Value!)
+        Path.Combine(builder.Configuration["FileStorage:BasePath"],
+                    builder.Configuration["FileStorage:ProfilePicturesFolder"])
             ),
-            RequestPath = "/Resources"
+            RequestPath = builder.Configuration["FileStorage:RequestPath"]
         });
 
         app.UseHttpsRedirection();

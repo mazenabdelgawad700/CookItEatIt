@@ -11,9 +11,9 @@ namespace RecipeApp.Service.Implementation
         {
             ArgumentNullException.ThrowIfNull(imageFile);
 
-            string contentPath = @"D:\RecipeAppImages\";
-            //string contentPath = environment.ContentRootPath;
-            string path = Path.Combine(contentPath, "Uploads");
+            string contentPath = "D:\\Sites\\site21841\\wwwroot\\FileStorage";
+            string uploadsFolder = "Uploads";
+            string path = Path.Combine(contentPath, uploadsFolder);
 
             if (!Directory.Exists(path))
             {
@@ -39,8 +39,7 @@ namespace RecipeApp.Service.Implementation
             if (string.IsNullOrEmpty(fileNameWithExtension))
                 return ReturnBaseHandler.Failed<bool>($"file({nameof(fileNameWithExtension)}) is null");
 
-            string contentPath = @"D:\RecipeAppImages\";
-            //string contentPath = environment.ContentRootPath;
+            string contentPath = "D:\\Sites\\site21841\\wwwroot\\FileStorage";
             string path = Path.Combine(contentPath, $"Uploads", fileNameWithExtension);
 
             if (!File.Exists(path))

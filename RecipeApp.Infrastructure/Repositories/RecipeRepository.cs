@@ -83,7 +83,6 @@ namespace RecipeApp.Infrastructure.Repositories
                 return ReturnBaseHandler.Failed<Recipe>(ex.Message);
             }
         }
-
         public async Task<ReturnBase<Recipe>> GetRecipeByIdAsNoTrackingAsync(int recipeId)
         {
             try
@@ -101,7 +100,6 @@ namespace RecipeApp.Infrastructure.Repositories
                 return ReturnBaseHandler.Failed<Recipe>(ex.Message);
             }
         }
-
         public ReturnBase<IQueryable<Recipe>> GetRecipesForUserAsync(int userId)
         {
             try
