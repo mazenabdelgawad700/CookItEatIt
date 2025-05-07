@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.FileProviders;
 using RecipeApp.Core;
 using RecipeApp.Core.MiddelWare;
 using RecipeApp.Domain.Entities.Identity;
@@ -81,14 +80,14 @@ public class Program
 
         app.UseMiddleware<ErrorHandlerMiddleware>();
 
-        app.UseStaticFiles(new StaticFileOptions
-        {
-            FileProvider = new PhysicalFileProvider(
-        Path.Combine(builder.Configuration["FileStorage:BasePath"],
-                    builder.Configuration["FileStorage:ProfilePicturesFolder"])
-            ),
-            RequestPath = builder.Configuration["FileStorage:RequestPath"]
-        });
+        //app.UseStaticFiles(new StaticFileOptions
+        //{
+        //    FileProvider = new PhysicalFileProvider(
+        //Path.Combine(builder.Configuration["FileStorage:BasePath"],
+        //            builder.Configuration["FileStorage:ProfilePicturesFolder"])
+        //    ),
+        //    RequestPath = builder.Configuration["FileStorage:RequestPath"]
+        //});
 
         app.UseHttpsRedirection();
 

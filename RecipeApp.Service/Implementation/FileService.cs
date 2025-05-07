@@ -11,8 +11,8 @@ namespace RecipeApp.Service.Implementation
         {
             ArgumentNullException.ThrowIfNull(imageFile);
 
-            string contentPath = "D:\\Sites\\site21841\\wwwroot\\FileStorage";
-            string uploadsFolder = "Uploads";
+            string contentPath = "D:\\Sites\\site21841\\wwwroot";
+            string uploadsFolder = "Uploads\\";
             string path = Path.Combine(contentPath, uploadsFolder);
 
             if (!Directory.Exists(path))
